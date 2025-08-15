@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Backend API Settings</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { color: green; }
+        .error { color: red; }
+        .warning { color: orange; }
+        button { padding: 8px 15px; margin: 5px; }
+        input { margin: 5px; padding: 5px; width: 300px; }
+        .result { margin: 10px 0; padding: 10px; background: #f5f5f5; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>Backend API Test Interface</h1>
+    
+    <div class="test-section">
+        <h3>Backend Configuration</h3>
+        <label>Backend API URL:</label><br>
+        <input type="text" id="backendUrl" value="http://localhost:3000" placeholder="http://localhost:3000"><br>
+        
+        <label>API Timeout (seconds):</label><br>
+        <input type="number" id="apiTimeout" value="30" min="5" max="120"><br>
+        
+        <label>Retry Attempts:</label><br>
+        <input type="number" id="retryAttempts" value="3" min="1" max="10"><br>
+        
+        <button onclick="testHealthEndpoint()">Test Health Endpoint</button>
+        <button onclick="testExtractEndpoint()">Test Extract Job Details</button>
+        <button onclick="testGenerateCVEndpoint()">Test Generate CV</button>
+        <button onclick="testAnalyzeJobEndpoint()">Test Analyze Job</button>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test Results</h3>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        function getBackendUrl() {
+            return document.getElementById('backendUrl').value.trim() || 'http://localhost:3000';
+        }
+
+        function getTimeout() {
+            return parseInt(document.getElementById('apiTimeout').value) * 1000 || 30000;
+        }
+
+        function addResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            results.insertBefore(div, results.firstChild);
+        }
+
+        async function testHealthEndpoint() {
+            const url = getBackendUrl();
+            addResult(`Testing health endpoint: ${url}/api/health`, 'info');
+            
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), getTimeout());
+                
+                const response = await fetch(`${url}/api/health`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addResult(`✅ Health check passed: ${JSON.stringify(data)}`, 'success');
+                } else {
+                    addResult(`❌ Health check failed: ${response.status} ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    addResult(`❌ Health check timeout after ${getTimeout()/1000} seconds`, 'error');
+                } else {
+                    addResult(`❌ Health check error: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        async function testExtractEndpoint() {
+            const url = getBackendUrl();
+            addResult(`Testing extract job details endpoint: ${url}/api/extract-job-details`, 'info');
+            
+            const testData = {
+                content: "Software Engineer position at Tech Corp. Requirements: React, Node.js, 3+ years experience. Salary: $100k-150k.",
+                url: "https://example.com/job",
+                extractCompanyInfo: true,
+                extractSalaryInfo: true
+            };
+            
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), getTimeout());
+                
+                const response = await fetch(`${url}/api/extract-job-details`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testData),
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addResult(`✅ Extract job details successful: ${JSON.stringify(data, null, 2)}`, 'success');
+                } else {
+                    addResult(`❌ Extract job details failed: ${response.status} ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    addResult(`❌ Extract job details timeout after ${getTimeout()/1000} seconds`, 'error');
+                } else {
+                    addResult(`❌ Extract job details error: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        async function testGenerateCVEndpoint() {
+            const url = getBackendUrl();
+            addResult(`Testing generate CV endpoint: ${url}/api/generate-cv`, 'info');
+            
+            const testData = {
+                jobDetails: {
+                    title: "Software Engineer",
+                    requirements: ["React", "Node.js"],
+                    description: "Looking for a skilled software engineer..."
+                },
+                userProfile: {
+                    name: "John Doe",
+                    email: "john@example.com",
+                    skills: ["JavaScript", "React", "Python"],
+                    experience: []
+                },
+                options: {
+                    format: "pdf",
+                    template: "ats-optimized",
+                    includeCoverLetter: false,
+                    optimizeKeywords: true,
+                    length: "auto"
+                }
+            };
+            
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), getTimeout());
+                
+                const response = await fetch(`${url}/api/generate-cv`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testData),
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addResult(`✅ Generate CV successful: ${JSON.stringify(data, null, 2)}`, 'success');
+                } else {
+                    addResult(`❌ Generate CV failed: ${response.status} ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    addResult(`❌ Generate CV timeout after ${getTimeout()/1000} seconds`, 'error');
+                } else {
+                    addResult(`❌ Generate CV error: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        async function testAnalyzeJobEndpoint() {
+            const url = getBackendUrl();
+            addResult(`Testing analyze job endpoint: ${url}/api/analyze-job`, 'info');
+            
+            const testData = {
+                jobDetails: {
+                    title: "Software Engineer",
+                    requirements: ["React", "Node.js", "Python"],
+                    description: "Looking for a skilled software engineer..."
+                },
+                userProfile: {
+                    skills: ["JavaScript", "React", "Python"],
+                    experience: []
+                }
+            };
+            
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), getTimeout());
+                
+                const response = await fetch(`${url}/api/analyze-job`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testData),
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addResult(`✅ Analyze job successful: ${JSON.stringify(data, null, 2)}`, 'success');
+                } else {
+                    addResult(`❌ Analyze job failed: ${response.status} ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    addResult(`❌ Analyze job timeout after ${getTimeout()/1000} seconds`, 'error');
+                } else {
+                    addResult(`❌ Analyze job error: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        // Test the health endpoint on page load
+        window.addEventListener('load', () => {
+            addResult('Backend API Test Interface loaded. Click test buttons to verify your backend endpoints.', 'info');
+        });
+    </script>
+</body>
+</html>

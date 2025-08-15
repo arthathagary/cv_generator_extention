@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Cursor Selection</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 40px; 
+            line-height: 1.6;
+            background-color: #f8f9fa;
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 30px; 
+            border-radius: 10px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; text-align: center; }
+        h2 { color: #666; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+        .job-posting {
+            background: #e3f2fd;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #2196f3;
+        }
+        .company-info {
+            background: #f3e5f5;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+        }
+        .requirements {
+            background: #e8f5e8;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+        }
+        .salary-info {
+            background: #fff3e0;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+            border: 2px dashed #ff9800;
+        }
+        ul { margin: 10px 0; }
+        li { margin: 5px 0; }
+        .highlight { background-color: #ffeb3b; padding: 2px 4px; }
+        .testing-note {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4caf50;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            max-width: 300px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+        }
+        .test-instructions {
+            background: #e1f5fe;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #03a9f4;
+        }
+    </style>
+</head>
+<body>
+    <div class="testing-note">
+        <strong>🧪 Cursor Selection Test Page</strong><br>
+        Open the extension popup and click "Start Cursor Selection" to test!
+    </div>
+
+    <div class="container">
+        <h1>Senior Frontend Developer Position</h1>
+        
+            <!-- Test instructions for extension -->
+    <div style="border: 2px dashed #e74c3c; padding: 20px; margin-top: 30px; background: #fdf2f2;">
+        <h4 style="color: #e74c3c;">🧪 Extension Testing Instructions</h4>
+        <ol>
+            <li><strong>Load the extension</strong> in Chrome developer mode</li>
+            <li><strong>Open this test page</strong> in a new tab</li>
+            <li><strong>Click the extension icon</strong> in the toolbar</li>
+            <li><strong>Click "Cursor Selection Mode"</strong> to activate testing mode</li>
+            <li><strong>Click "Start Cursor Selection"</strong></li>
+            <li><strong>Hover and click on different elements</strong> above to select content</li>
+            <li><strong>Press Enter or click "Finish"</strong> to complete selection</li>
+            <li><strong>Click "Send to AI for Processing"</strong> to test the API</li>
+            <li><strong>Check the console</strong> for detailed logs and results</li>
+        </ol>
+        <p><strong>Expected Result:</strong> The extension should extract the selected content, send it to the backend API at <code>http://localhost:3000/api/content/analyze</code>, and display a structured analysis with content type detection, cleaned content, and structured data extraction.</p>
+    </div>
+
+        <div class="company-info">
+            <h2>🏢 Company: TechCorp Solutions</h2>
+            <p><strong>Location:</strong> San Francisco, CA (Remote Friendly)</p>
+            <p><strong>Company Size:</strong> 100-500 employees</p>
+            <p><strong>Industry:</strong> Software Technology</p>
+        </div>
+
+        <div class="job-posting">
+            <h2>📋 Job Description</h2>
+            <p>We're looking for a <span class="highlight">Senior Frontend Developer</span> to join our growing team. You'll be working on cutting-edge web applications using modern technologies and frameworks.</p>
+            
+            <p>This is a full-time position offering competitive compensation, excellent benefits, and the opportunity to work with a talented team on challenging projects that impact millions of users.</p>
+        </div>
+
+        <div class="requirements">
+            <h2>✅ Requirements</h2>
+            <ul>
+                <li><strong>5+ years</strong> of experience in frontend development</li>
+                <li>Expert knowledge of <strong>React.js</strong> and <strong>TypeScript</strong></li>
+                <li>Experience with <strong>Next.js</strong> or similar frameworks</li>
+                <li>Strong understanding of <strong>HTML5, CSS3, and modern JavaScript</strong></li>
+                <li>Experience with <strong>responsive design</strong> and <strong>mobile-first development</strong></li>
+                <li>Knowledge of <strong>Git</strong> and version control workflows</li>
+                <li>Experience with <strong>testing frameworks</strong> (Jest, Cypress, etc.)</li>
+                <li>Strong problem-solving skills and attention to detail</li>
+            </ul>
+            
+            <h3>Bonus Skills:</h3>
+            <ul>
+                <li>Experience with <strong>GraphQL</strong> and <strong>Apollo Client</strong></li>
+                <li>Knowledge of <strong>Node.js</strong> and backend development</li>
+                <li>Experience with <strong>AWS</strong> or other cloud platforms</li>
+                <li>UI/UX design experience</li>
+            </ul>
+        </div>
+
+        <div class="salary-info">
+            <h2>💰 Compensation & Benefits</h2>
+            <p><strong>Salary Range:</strong> $120,000 - $180,000 annually</p>
+            <p><strong>Equity:</strong> Stock options included</p>
+            <p><strong>Benefits:</strong></p>
+            <ul>
+                <li>Health, Dental & Vision Insurance</li>
+                <li>401(k) with company matching</li>
+                <li>Unlimited PTO policy</li>
+                <li>$2,000 annual learning budget</li>
+                <li>Remote work flexibility</li>
+                <li>Top-tier equipment provided</li>
+            </ul>
+        </div>
+
+        <div class="job-posting">
+            <h2>🚀 What You'll Do</h2>
+            <ul>
+                <li>Build and maintain <strong>responsive web applications</strong></li>
+                <li>Collaborate with <strong>designers and product managers</strong></li>
+                <li>Implement <strong>new features</strong> and optimize existing code</li>
+                <li>Write <strong>clean, maintainable code</strong> with comprehensive tests</li>
+                <li>Participate in <strong>code reviews</strong> and team discussions</li>
+                <li>Mentor junior developers and share knowledge</li>
+                <li>Stay updated with the latest <strong>frontend technologies</strong></li>
+            </ul>
+        </div>
+
+        <div class="company-info">
+            <h2>📞 Application Process</h2>
+            <p><strong>How to Apply:</strong> Send your resume and portfolio to careers@techcorp.com</p>
+            <p><strong>Response Time:</strong> We typically respond within 2-3 business days</p>
+            <p><strong>Interview Process:</strong></p>
+            <ol>
+                <li>Initial phone/video screening (30 minutes)</li>
+                <li>Technical interview with coding challenges (60 minutes)</li>
+                <li>Team fit interview with potential colleagues (45 minutes)</li>
+                <li>Final interview with engineering leadership (30 minutes)</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // Add some interactivity for testing
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🧪 Test page loaded - Ready for cursor selection testing');
+            
+            // Log mouse movements for debugging
+            let logCount = 0;
+            document.addEventListener('mousemove', function(e) {
+                if (logCount % 50 === 0) { // Log every 50th movement to avoid spam
+                    console.log('Mouse position:', e.clientX, e.clientY, 'Target:', e.target.tagName);
+                }
+                logCount++;
+            });
+            
+            // Log clicks
+            document.addEventListener('click', function(e) {
+                console.log('🖱️ Click detected on:', e.target.tagName, e.target.textContent?.substring(0, 50) + '...');
+            });
+        });
+    </script>
+</body>
+</html>

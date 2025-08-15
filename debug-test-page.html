@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extension Debug Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .debug-info {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .test-content {
+            background: #e8f5e8;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #4caf50;
+        }
+        .error {
+            background: #ffe8e8;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #f44336;
+        }
+        button {
+            background: #2196f3;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Extension Debug Test Page</h1>
+    
+    <div class="debug-info">
+        <h3>Debug Information</h3>
+        <p><strong>URL:</strong> <span id="current-url"></span></p>
+        <p><strong>User Agent:</strong> <span id="user-agent"></span></p>
+        <p><strong>Time:</strong> <span id="current-time"></span></p>
+    </div>
+
+    <div id="extension-status" class="error">
+        <h3>❌ Extension Status: Checking...</h3>
+        <p id="status-details">Please wait while we check extension status...</p>
+    </div>
+
+    <div class="test-content">
+        <h3>📝 Sample Content for Selection</h3>
+        <p id="paragraph1">This is the first paragraph with some sample text that can be selected using cursor selection.</p>
+        <p id="paragraph2">This is a second paragraph with different content. It contains multiple sentences to test selection.</p>
+        
+        <ul id="list1">
+            <li>First list item with content</li>
+            <li>Second list item for testing</li>
+            <li>Third list item with more text</li>
+        </ul>
+        
+        <div id="content-block">
+            <h4>Content Block Title</h4>
+            <p>This is a content block with multiple elements that can be selected individually or as a group.</p>
+        </div>
+    </div>
+
+    <div class="debug-info">
+        <h3>🧪 Manual Tests</h3>
+        <button onclick="testExtensionPresence()">Test Extension Presence</button>
+        <button onclick="testCursorSelection()">Test Cursor Selection</button>
+        <button onclick="showConsoleInstructions()">Show Console Instructions</button>
+        
+        <div id="test-results" style="margin-top: 15px; padding: 10px; background: white; border-radius: 5px;"></div>
+    </div>
+
+    <script>
+        // Set basic info
+        document.getElementById('current-url').textContent = window.location.href;
+        document.getElementById('user-agent').textContent = navigator.userAgent;
+        document.getElementById('current-time').textContent = new Date().toLocaleString();
+
+        // Extension presence check
+        function checkExtensionStatus() {
+            setTimeout(() => {
+                const statusDiv = document.getElementById('extension-status');
+                const detailsP = document.getElementById('status-details');
+                
+                if (window.resumeAIAreaSelector) {
+                    statusDiv.className = 'test-content';
+                    statusDiv.innerHTML = '<h3>✅ Extension Status: Loaded Successfully</h3>';
+                    detailsP.textContent = 'Content script is loaded and ready for testing.';
+                } else {
+                    statusDiv.className = 'error';
+                    statusDiv.innerHTML = '<h3>❌ Extension Status: Not Loaded</h3>';
+                    detailsP.textContent = 'Content script not found. Extension may not be installed or enabled.';
+                }
+            }, 2000);
+        }
+
+        function testExtensionPresence() {
+            const results = document.getElementById('test-results');
+            if (window.resumeAIAreaSelector) {
+                results.innerHTML = '<div style="color: green;">✅ Extension object found</div>';
+                console.log('Extension object:', window.resumeAIAreaSelector);
+            } else {
+                results.innerHTML = '<div style="color: red;">❌ Extension object not found</div>';
+                console.log('Window properties:', Object.keys(window).filter(k => k.toLowerCase().includes('resume')));
+            }
+        }
+
+        function testCursorSelection() {
+            const results = document.getElementById('test-results');
+            if (window.resumeAIAreaSelector && typeof window.resumeAIAreaSelector.startCursorSelection === 'function') {
+                try {
+                    window.resumeAIAreaSelector.startCursorSelection();
+                    results.innerHTML = '<div style="color: green;">✅ Cursor selection started - try hovering over elements</div>';
+                } catch (error) {
+                    results.innerHTML = `<div style="color: red;">❌ Error starting cursor selection: ${error.message}</div>`;
+                }
+            } else {
+                results.innerHTML = '<div style="color: red;">❌ startCursorSelection method not available</div>';
+            }
+        }
+
+        function showConsoleInstructions() {
+            const instructions = `
+=== CONSOLE DEBUGGING INSTRUCTIONS ===
+
+1. Open Developer Tools (F12)
+2. Go to Console tab
+3. Look for these messages:
+   - "[Content Script] Starting Resume AI Area Selector initialization..."
+   - "[AreaSelector] Starting constructor..."
+   - "[Content Script] ✅ Resume AI Area Selector loaded successfully"
+
+4. Test extension manually:
+   window.resumeAIAreaSelector.startCursorSelection()
+
+5. Check if extension popup works:
+   - Click extension icon
+   - Click "Manual Selection Mode"
+   - Should see cursor selection start
+
+6. If not working, check:
+   - Extension is enabled in chrome://extensions/
+   - Extension was reloaded after changes
+   - No JavaScript errors in console
+   - Page was refreshed after extension reload
+            `;
+            
+            console.log(instructions);
+            document.getElementById('test-results').innerHTML = '<div style="color: blue;">📋 Instructions logged to console - check F12</div>';
+        }
+
+        // Auto-check status on load
+        checkExtensionStatus();
+        
+        // Log debug info
+        console.log('=== EXTENSION DEBUG PAGE LOADED ===');
+        console.log('URL:', window.location.href);
+        console.log('Waiting 3 seconds to check extension...');
+        
+        setTimeout(() => {
+            console.log('Extension check result:', !!window.resumeAIAreaSelector);
+            if (window.resumeAIAreaSelector) {
+                console.log('Available methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(window.resumeAIAreaSelector)));
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

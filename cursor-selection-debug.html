@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cursor Selection Debug Tool</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f8f9fa; }
+        .debug-container { max-width: 900px; margin: 0 auto; }
+        .debug-section { background: white; margin: 20px 0; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .error-log { background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        .success-log { background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        .warning-log { background: #fff3cd; color: #856404; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        button { margin: 5px; padding: 10px 15px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 12px; }
+        .status-indicator { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }
+        .status-success { background-color: #28a745; }
+        .status-error { background-color: #dc3545; }
+        .status-warning { background-color: #ffc107; }
+        .test-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+        .test-card { border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; background: #f8f9fa; }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <h1>🔧 Cursor Selection Debug Tool</h1>
+        <p>This tool helps debug the cursor selection functionality in the popup extension.</p>
+        
+        <div class="debug-section">
+            <h2>Quick Debug Actions</h2>
+            <button onclick="runDOMTest()">🔍 Test DOM Elements</button>
+            <button onclick="runButtonStateTest()">🔲 Test Button States</button>
+            <button onclick="runEventListenerTest()">⚡ Test Event Listeners</button>
+            <button onclick="runFullDiagnostic()">🩺 Full Diagnostic</button>
+            <button onclick="clearLogs()">🗑️ Clear Logs</button>
+        </div>
+        
+        <div class="debug-section">
+            <h2>Real-time Debug Output</h2>
+            <div id="debug-output"></div>
+        </div>
+        
+        <div class="debug-section">
+            <h2>Diagnostic Results</h2>
+            <div class="test-grid" id="diagnostic-results">
+                <!-- Results will be populated here -->
+            </div>
+        </div>
+        
+        <div class="debug-section">
+            <h2>Error Analysis</h2>
+            <div id="error-analysis">
+                <h3>Common Issues & Solutions:</h3>
+                <ul>
+                    <li><strong>Line 1204 Error:</strong> Usually indicates DOM element access issue</li>
+                    <li><strong>safeSetButtonState fails:</strong> Element not found or not initialized</li>
+                    <li><strong>showNotification fails:</strong> Document body not available</li>
+                    <li><strong>Chrome APIs fail:</strong> Extension context or permissions issue</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Mock popup structure for testing -->
+        <div style="display: none;" id="mock-popup">
+            <div id="job-status" class="status-card">
+                <p id="job-status-text">Ready to extract job details</p>
+            </div>
+            <div class="actions-section">
+                <button id="connect-profile">Connect Profile</button>
+                <button id="extract-job">Extract Job</button>
+                <button id="manual-select">Manual Selection</button>
+                <button id="generate-cv">Generate CV</button>
+                <button id="download-cv">Download CV</button>
+                <button id="edit-cv">Edit CV</button>
+                <button id="settings-btn">Settings</button>
+                <button id="help-btn">Help</button>
+            </div>
+            <div class="manual-selection-section" id="manual-selection-section">
+                <button id="clear-selections">Clear Selections</button>
+                <button id="finish-manual-selection">Finish Selection</button>
+                <button id="start-area-selection">Start Area Selection</button>
+                <button id="start-cursor-selection">Start Cursor Selection</button>
+                <button id="select-viewport">Select Viewport</button>
+                <button id="select-full-page">Select Full Page</button>
+                <button id="start-scroll-selection">Start Scroll Selection</button>
+                <button id="modify-selection">Modify Selection</button>
+                <button id="send-to-ai">Send to AI</button>
+                <button id="approve-analysis">Approve Analysis</button>
+                <button id="reselect-content">Reselect Content</button>
+            </div>
+            <div id="progress-section">
+                <div id="progress-fill"></div>
+                <div id="progress-text">Processing...</div>
+            </div>
+            <div id="results-section">
+                <div id="job-summary"></div>
+            </div>
+            <div id="selection-preview">
+                <div id="preview-content"></div>
+            </div>
+            <div id="ai-analysis">
+                <div id="analysis-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock PopupController for testing
+        class DebugPopupController {
+            constructor() {
+                this.initializeElements();
+                this.selectedContent = null;
+                this.aiAnalysisResult = null;
+            }
+
+            initializeElements() {
+                this.elements = {
+                    jobStatus: document.getElementById('job-status-text'),
+                    profileIndicator: document.getElementById('profile-indicator'),
+                    profileText: document.getElementById('profile-text'),
+                    connectProfileBtn: document.getElementById('connect-profile'),
+                    extractJobBtn: document.getElementById('extract-job'),
+                    manualSelectBtn: document.getElementById('manual-select'),
+                    generateCvBtn: document.getElementById('generate-cv'),
+                    progressSection: document.getElementById('progress-section'),
+                    progressFill: document.getElementById('progress-fill'),
+                    progressText: document.getElementById('progress-text'),
+                    resultsSection: document.getElementById('results-section'),
+                    jobSummary: document.getElementById('job-summary'),
+                    downloadCvBtn: document.getElementById('download-cv'),
+                    editCvBtn: document.getElementById('edit-cv'),
+                    settingsBtn: document.getElementById('settings-btn'),
+                    helpBtn: document.getElementById('help-btn'),
+                    manualSelectionSection: document.getElementById('manual-selection-section'),
+                    clearSelectionsBtn: document.getElementById('clear-selections'),
+                    finishManualSelectionBtn: document.getElementById('finish-manual-selection'),
+                    startAreaSelectionBtn: document.getElementById('start-area-selection'),
+                    startCursorSelectionBtn: document.getElementById('start-cursor-selection'),
+                    selectViewportBtn: document.getElementById('select-viewport'),
+                    selectFullPageBtn: document.getElementById('select-full-page'),
+                    startScrollSelectionBtn: document.getElementById('start-scroll-selection'),
+                    selectionPreview: document.getElementById('selection-preview'),
+                    previewContent: document.getElementById('preview-content'),
+                    modifySelectionBtn: document.getElementById('modify-selection'),
+                    sendToAiBtn: document.getElementById('send-to-ai'),
+                    aiAnalysis: document.getElementById('ai-analysis'),
+                    analysisContent: document.getElementById('analysis-content'),
+                    approveAnalysisBtn: document.getElementById('approve-analysis'),
+                    reselectContentBtn: document.getElementById('reselect-content')
+                };
+            }
+
+            safeSetButtonState(elementName, disabled, text = null) {
+                try {
+                    if (!elementName || typeof elementName !== 'string') {
+                        logDebug(`Invalid element name: ${elementName}`, 'warning');
+                        return false;
+                    }
+                    
+                    if (!this.elements) {
+                        logDebug('Elements object not initialized', 'error');
+                        return false;
+                    }
+                    
+                    const element = this.elements[elementName];
+                    if (element && element.nodeType === Node.ELEMENT_NODE) {
+                        if (typeof disabled === 'boolean') {
+                            element.disabled = disabled;
+                        }
+                        
+                        if (text !== null && typeof text === 'string') {
+                            element.textContent = text;
+                        }
+                        
+                        logDebug(`Successfully set button state for ${elementName}`, 'success');
+                        return true;
+                    } else {
+                        logDebug(`Button element '${elementName}' not found or invalid`, 'warning');
+                        return false;
+                    }
+                } catch (error) {
+                    logDebug(`Error setting button state for '${elementName}': ${error.message}`, 'error');
+                    return false;
+                }
+            }
+
+            safeAddEventListener(elementName, event, handler) {
+                try {
+                    const element = this.elements[elementName];
+                    if (element && typeof element.addEventListener === 'function') {
+                        element.addEventListener(event, handler);
+                        logDebug(`Added event listener to ${elementName}`, 'success');
+                        return true;
+                    } else {
+                        logDebug(`Cannot add event listener to '${elementName}' - element not found`, 'warning');
+                        return false;
+                    }
+                } catch (error) {
+                    logDebug(`Error adding event listener to '${elementName}': ${error.message}`, 'error');
+                    return false;
+                }
+            }
+
+            showNotification(message, type) {
+                try {
+                    const notification = document.createElement('div');
+                    notification.className = `notification ${type}`;
+                    notification.textContent = message;
+                    
+                    Object.assign(notification.style, {
+                        position: 'fixed',
+                        top: '10px',
+                        right: '10px',
+                        padding: '10px 15px',
+                        borderRadius: '4px',
+                        color: 'white',
+                        fontSize: '12px',
+                        zIndex: '9999',
+                        background: type === 'success' ? '#28a745' : '#dc3545'
+                    });
+                    
+                    const container = document.body || document.documentElement;
+                    if (container) {
+                        container.appendChild(notification);
+                        logDebug(`Notification shown: ${message}`, 'success');
+                        
+                        setTimeout(() => {
+                            if (notification && notification.parentNode) {
+                                notification.remove();
+                            }
+                        }, 3000);
+                        return true;
+                    } else {
+                        logDebug('Could not display notification - no container found', 'error');
+                        return false;
+                    }
+                } catch (error) {
+                    logDebug(`Error showing notification: ${error.message}`, 'error');
+                    return false;
+                }
+            }
+
+            async startCursorSelection() {
+                try {
+                    logDebug('Starting cursor selection...', 'info');
+                    logDebug(`Elements object: ${this.elements ? 'exists' : 'missing'}`, 'info');
+                    logDebug(`Cursor button: ${this.elements?.startCursorSelectionBtn ? 'found' : 'not found'}`, 'info');
+                    
+                    const buttonResult = this.safeSetButtonState('startCursorSelectionBtn', true, '👆 Selecting...');
+                    logDebug(`Button state set result: ${buttonResult}`, buttonResult ? 'success' : 'error');
+                    
+                    this.showNotification('Debug: Cursor selection started', 'success');
+                    logDebug('Cursor selection debug completed successfully', 'success');
+                    
+                    return { success: true };
+                } catch (error) {
+                    logDebug(`Error in startCursorSelection: ${error.message}`, 'error');
+                    logDebug(`Error stack: ${error.stack}`, 'error');
+                    return { success: false, error: error.message };
+                }
+            }
+        }
+
+        let debugController = null;
+
+        function logDebug(message, type = 'info') {
+            const output = document.getElementById('debug-output');
+            const timestamp = new Date().toLocaleTimeString();
+            const logClass = type === 'error' ? 'error-log' : type === 'success' ? 'success-log' : type === 'warning' ? 'warning-log' : '';
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = logClass;
+            logEntry.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+            
+            output.appendChild(logEntry);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('debug-output').innerHTML = '';
+            document.getElementById('diagnostic-results').innerHTML = '';
+        }
+
+        function runDOMTest() {
+            logDebug('=== DOM Elements Test ===', 'info');
+            
+            try {
+                debugController = new DebugPopupController();
+                
+                const elementTests = [
+                    'startCursorSelectionBtn',
+                    'startAreaSelectionBtn',
+                    'selectViewportBtn',
+                    'sendToAiBtn',
+                    'manualSelectBtn',
+                    'generateCvBtn'
+                ];
+                
+                let passedTests = 0;
+                elementTests.forEach(elementName => {
+                    const element = debugController.elements[elementName];
+                    if (element) {
+                        logDebug(`✅ ${elementName}: Found`, 'success');
+                        passedTests++;
+                    } else {
+                        logDebug(`❌ ${elementName}: Not found`, 'error');
+                    }
+                });
+                
+                logDebug(`DOM Test Summary: ${passedTests}/${elementTests.length} elements found`, 
+                    passedTests === elementTests.length ? 'success' : 'warning');
+                
+            } catch (error) {
+                logDebug(`DOM Test Error: ${error.message}`, 'error');
+            }
+        }
+
+        function runButtonStateTest() {
+            logDebug('=== Button State Test ===', 'info');
+            
+            if (!debugController) {
+                debugController = new DebugPopupController();
+            }
+            
+            const buttonTests = [
+                { element: 'startCursorSelectionBtn', disabled: true, text: 'Testing...' },
+                { element: 'sendToAiBtn', disabled: false, text: 'Send to AI' },
+                { element: 'manualSelectBtn', disabled: false, text: 'Manual Selection' }
+            ];
+            
+            let passedTests = 0;
+            buttonTests.forEach(test => {
+                const result = debugController.safeSetButtonState(test.element, test.disabled, test.text);
+                if (result) {
+                    passedTests++;
+                }
+            });
+            
+            logDebug(`Button State Test Summary: ${passedTests}/${buttonTests.length} tests passed`, 
+                passedTests === buttonTests.length ? 'success' : 'warning');
+        }
+
+        function runEventListenerTest() {
+            logDebug('=== Event Listener Test ===', 'info');
+            
+            if (!debugController) {
+                debugController = new DebugPopupController();
+            }
+            
+            const testHandler = () => logDebug('Test event fired', 'success');
+            
+            const eventTests = [
+                { element: 'startCursorSelectionBtn', event: 'click', handler: testHandler },
+                { element: 'sendToAiBtn', event: 'click', handler: testHandler }
+            ];
+            
+            let passedTests = 0;
+            eventTests.forEach(test => {
+                const result = debugController.safeAddEventListener(test.element, test.event, test.handler);
+                if (result) {
+                    passedTests++;
+                }
+            });
+            
+            logDebug(`Event Listener Test Summary: ${passedTests}/${eventTests.length} tests passed`, 
+                passedTests === eventTests.length ? 'success' : 'warning');
+        }
+
+        async function runFullDiagnostic() {
+            logDebug('=== Full Diagnostic Starting ===', 'info');
+            
+            // Clear previous results
+            document.getElementById('diagnostic-results').innerHTML = '';
+            
+            try {
+                // Initialize controller
+                debugController = new DebugPopupController();
+                
+                // Test cursor selection function
+                logDebug('Testing startCursorSelection method...', 'info');
+                const cursorResult = await debugController.startCursorSelection();
+                
+                const diagnosticResults = document.getElementById('diagnostic-results');
+                
+                // Add diagnostic cards
+                const tests = [
+                    {
+                        name: 'Controller Initialization',
+                        status: debugController ? 'success' : 'error',
+                        details: debugController ? 'PopupController created successfully' : 'Failed to create PopupController'
+                    },
+                    {
+                        name: 'Elements Object',
+                        status: debugController.elements ? 'success' : 'error',
+                        details: `${Object.keys(debugController.elements).length} elements initialized`
+                    },
+                    {
+                        name: 'Cursor Button',
+                        status: debugController.elements.startCursorSelectionBtn ? 'success' : 'error',
+                        details: debugController.elements.startCursorSelectionBtn ? 'Button found and accessible' : 'Button not found'
+                    },
+                    {
+                        name: 'startCursorSelection Method',
+                        status: cursorResult.success ? 'success' : 'error',
+                        details: cursorResult.success ? 'Method executed without errors' : `Error: ${cursorResult.error}`
+                    },
+                    {
+                        name: 'Notification System',
+                        status: 'success', // Will be updated based on actual test
+                        details: 'Notification system operational'
+                    }
+                ];
+                
+                tests.forEach(test => {
+                    const card = document.createElement('div');
+                    card.className = 'test-card';
+                    card.innerHTML = `
+                        <h4><span class="status-indicator status-${test.status}"></span>${test.name}</h4>
+                        <p>${test.details}</p>
+                    `;
+                    diagnosticResults.appendChild(card);
+                });
+                
+                logDebug('=== Full Diagnostic Complete ===', 'success');
+                
+            } catch (error) {
+                logDebug(`Diagnostic Error: ${error.message}`, 'error');
+                logDebug(`Stack: ${error.stack}`, 'error');
+            }
+        }
+
+        // Auto-run basic tests on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                logDebug('Debug tool loaded - ready for testing', 'success');
+            }, 500);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+{
+  "name": "resume-ai-extension",
+  "version": "1.0.0",
+  "description": "AI-powered job-tailored CV generator Chrome extension",
+  "scripts": {
+    "build": "node build.js",
+    "build:prod": "NODE_ENV=production node build.js",
+    "dev": "BACKEND_API_URL=http://localhost:3000 npm run build",
+    "prod": "BACKEND_API_URL=https://your-production-backend.com npm run build:prod",
+    "validate": "python3 validate_extension.py"
+  },
+  "devDependencies": {
+    "dotenv": "^16.0.0"
+  },
+  "keywords": [
+    "chrome-extension",
+    "ai",
+    "resume",
+    "cv",
+    "job-application",
+    "ats-optimization"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/resume-ai-extension.git"
+  }
+}

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test CV Download</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            background: #f5f5f5;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #005a87;
+        }
+        .result {
+            background: #e8f5e8;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #28a745;
+        }
+        .error {
+            background: #ffe6e6;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 CV Download Test Page</h1>
+    
+    <div class="test-section">
+        <h2>Test CV Download Functionality</h2>
+        <p>This page helps test the CV download feature of the Resume AI extension.</p>
+        
+        <button onclick="createTestCV()">Create Test CV Data</button>
+        <button onclick="checkStoredCV()">Check Stored CV</button>
+        <button onclick="clearStoredCV()">Clear CV Data</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Sample Job Content</h2>
+        <div id="job-content">
+            <h3>Senior Frontend Developer - TechCorp Inc.</h3>
+            <p><strong>Location:</strong> San Francisco, CA (Remote OK)</p>
+            <p><strong>Salary:</strong> $120,000 - $150,000</p>
+            
+            <h4>Job Description:</h4>
+            <p>We are seeking a highly skilled Senior Frontend Developer to join our dynamic team. You will be responsible for building responsive web applications using modern JavaScript frameworks and ensuring excellent user experience across all platforms.</p>
+            
+            <h4>Requirements:</h4>
+            <ul>
+                <li>5+ years of experience with React, TypeScript, and modern JavaScript</li>
+                <li>Strong knowledge of HTML5, CSS3, and responsive design</li>
+                <li>Experience with Node.js and RESTful APIs</li>
+                <li>Familiarity with Git version control and CI/CD pipelines</li>
+                <li>Bachelor's degree in Computer Science or equivalent experience</li>
+                <li>Excellent communication and teamwork skills</li>
+            </ul>
+            
+            <h4>Preferred Skills:</h4>
+            <ul>
+                <li>Experience with Next.js, GraphQL, and AWS</li>
+                <li>Knowledge of testing frameworks (Jest, Cypress)</li>
+                <li>Understanding of accessibility standards (WCAG)</li>
+                <li>Experience with Docker and Kubernetes</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function log(message, type = 'result') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}:</strong> ${message}`;
+            results.appendChild(div);
+            console.log(message);
+        }
+
+        async function createTestCV() {
+            try {
+                const testCVData = {
+                    content: `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>ATS-Optimized Resume</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 40px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .section { margin-bottom: 25px; }
+        .section h2 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 5px; }
+        ul { margin: 0; padding-left: 20px; }
+        .contact-info { text-align: center; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>John Doe</h1>
+        <div class="contact-info">
+            <p>📧 john.doe@email.com | 📱 (555) 123-4567 | 🌐 linkedin.com/in/johndoe | San Francisco, CA</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Professional Summary</h2>
+        <p>Senior Frontend Developer with 6+ years of experience building responsive web applications using React, TypeScript, and modern JavaScript frameworks. Proven track record of delivering high-quality user interfaces and optimizing application performance. Strong expertise in Node.js, RESTful APIs, and agile development methodologies.</p>
+    </div>
+
+    <div class="section">
+        <h2>Technical Skills</h2>
+        <ul>
+            <li><strong>Frontend:</strong> React, TypeScript, JavaScript (ES6+), HTML5, CSS3, Next.js</li>
+            <li><strong>Backend:</strong> Node.js, Express.js, RESTful APIs, GraphQL</li>
+            <li><strong>Tools & Technologies:</strong> Git, Webpack, Docker, AWS, CI/CD, Jest, Cypress</li>
+            <li><strong>Databases:</strong> MongoDB, PostgreSQL, Redis</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Professional Experience</h2>
+        
+        <h3>Senior Frontend Developer | TechStart Solutions (2021 - Present)</h3>
+        <ul>
+            <li>Led development of responsive web applications serving 50,000+ daily active users</li>
+            <li>Implemented React-based component library reducing development time by 40%</li>
+            <li>Optimized application performance resulting in 25% faster load times</li>
+            <li>Collaborated with cross-functional teams using agile methodologies</li>
+        </ul>
+
+        <h3>Frontend Developer | WebCorp Inc. (2019 - 2021)</h3>
+        <ul>
+            <li>Developed and maintained multiple client-facing web applications using React and TypeScript</li>
+            <li>Integrated RESTful APIs and implemented state management with Redux</li>
+            <li>Ensured cross-browser compatibility and responsive design principles</li>
+            <li>Participated in code reviews and maintained high code quality standards</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Education</h2>
+        <p><strong>Bachelor of Science in Computer Science</strong><br>
+        University of California, Berkeley | 2019</p>
+    </div>
+
+    <div class="section">
+        <h2>Certifications</h2>
+        <ul>
+            <li>AWS Certified Developer - Associate (2022)</li>
+            <li>React Developer Certification (2021)</li>
+        </ul>
+    </div>
+</body>
+</html>`,
+                    jobTitle: "Senior Frontend Developer",
+                    company: "TechCorp Inc.",
+                    timestamp: new Date().toISOString(),
+                    atsOptimized: true,
+                    matchScore: 92,
+                    generatedBy: "Test_System"
+                };
+
+                // Store test CV data
+                await chrome.storage.local.set({ generatedCV: testCVData });
+                
+                log('✅ Test CV data created and stored successfully!');
+                log(`📄 CV Content Length: ${testCVData.content.length} characters`);
+                log(`🎯 Job Title: ${testCVData.jobTitle}`);
+                log(`🏢 Company: ${testCVData.company}`);
+                
+            } catch (error) {
+                log(`❌ Error creating test CV: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkStoredCV() {
+            try {
+                const result = await chrome.storage.local.get(['generatedCV']);
+                
+                if (result.generatedCV) {
+                    log('✅ CV data found in storage!');
+                    log(`📊 Data structure: ${Object.keys(result.generatedCV).join(', ')}`);
+                    log(`📄 Content length: ${result.generatedCV.content?.length || 'No content'} characters`);
+                    log(`🎯 Job title: ${result.generatedCV.jobTitle || 'Not specified'}`);
+                    log(`🏢 Company: ${result.generatedCV.company || 'Not specified'}`);
+                } else {
+                    log('❌ No CV data found in storage', 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Error checking CV data: ${error.message}`, 'error');
+            }
+        }
+
+        async function clearStoredCV() {
+            try {
+                await chrome.storage.local.remove(['generatedCV']);
+                log('🗑️ CV data cleared from storage');
+            } catch (error) {
+                log(`❌ Error clearing CV data: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-check for CV data on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🔍 CV Download Test Page loaded');
+            checkStoredCV();
+        });
+    </script>
+</body>
+</html>
