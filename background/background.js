@@ -412,38 +412,12 @@ if (chrome.contextMenus) {
 }
 
 function checkJobSite(tabId, url) {
-    const jobSites = [
-        'linkedin.com/jobs',
-        'indeed.com/job', 
-        'indeed.com/viewjob',
-        'glassdoor.com/job',
-        'monster.com/job',
-        'ziprecruiter.com/job',
-        'careerbuilder.com/job',
-        'angel.co',
-        'wellfound.com',
-        'remoteok.io',
-        'weworkremotely.com',
-        'stackoverflow.com/jobs',
-        'stackoverflow.com/job'
-    ];
-    
-    const isJobSite = jobSites.some(site => url.toLowerCase().includes(site));
-    
-    if (isJobSite) {
-        chrome.action.setBadgeText({ text: '💼', tabId: tabId });
-        chrome.action.setBadgeBackgroundColor({ color: '#4CAF50', tabId: tabId });
-        chrome.action.setTitle({ 
-            title: 'Resume AI - Job posting detected! Click to analyze.',
-            tabId: tabId 
-        });
-    } else {
-        chrome.action.setBadgeText({ text: '', tabId: tabId });
-        chrome.action.setTitle({ 
-            title: 'Resume AI - Job-Tailored CV Generator',
-            tabId: tabId 
-        });
-    }
+    // Universal cursor selection support - no specific site detection needed
+    chrome.action.setBadgeText({ text: '', tabId: tabId });
+    chrome.action.setTitle({ 
+        title: 'Resume AI - Select job text and extract details from any website',
+        tabId: tabId 
+    });
 }
 
 async function generateCV(jobDetails, userProfile) {

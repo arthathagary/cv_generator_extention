@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto-Extraction Removal Test - Resume AI Extension</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            border: 2px solid #e0e0e0;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border-color: #ffeaa7;
+        }
+        .linkedin-simulation {
+            background-color: #0077b5;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .indeed-simulation {
+            background-color: #2164f3;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .glassdoor-simulation {
+            background-color: #0caa41;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .job-content {
+            background: white;
+            color: #333;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .checklist {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #007bff;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚫 Auto-Extraction Removal Test</h1>
+    
+    <div class="test-section success">
+        <h2>✅ Expected Behavior After Removal</h2>
+        <ul>
+            <li><strong>No site-specific detection:</strong> Extension should NOT detect LinkedIn, Indeed, or Glassdoor</li>
+            <li><strong>Universal message:</strong> "Ready for cursor selection on any website"</li>
+            <li><strong>Consistent button:</strong> "Use Cursor Selection Below" for all sites</li>
+            <li><strong>No auto-extraction:</strong> Never automatically scrape page content</li>
+            <li><strong>User control only:</strong> Only process text that user manually selects</li>
+        </ul>
+    </div>
+
+    <div class="test-section warning">
+        <h2>❌ Previous Behavior (Now Removed)</h2>
+        <ul>
+            <li>~~"LinkedIn Jobs detected - enhanced extraction available"~~</li>
+            <li>~~"Auto-Extract from LinkedIn"~~ button text</li>
+            <li>~~Site-specific job site lists~~</li>
+            <li>~~Automatic page content scraping~~</li>
+            <li>~~Different behavior per job site~~</li>
+        </ul>
+    </div>
+
+    <h2>🧪 Test Different Site Patterns</h2>
+
+    <div class="linkedin-simulation">
+        <h3>LinkedIn Jobs Simulation</h3>
+        <div class="job-content">
+            <h4>Software Engineer - Full Stack</h4>
+            <p><strong>Company:</strong> Tech Innovations Inc.</p>
+            <p><strong>Location:</strong> San Francisco, CA</p>
+            <p>We are seeking a passionate Full Stack Software Engineer to join our dynamic team...</p>
+        </div>
+        <p><strong>Test:</strong> Extension should NOT show "LinkedIn detected" message</p>
+    </div>
+
+    <div class="indeed-simulation">
+        <h3>Indeed Jobs Simulation</h3>
+        <div class="job-content">
+            <h4>Senior React Developer</h4>
+            <p><strong>Company:</strong> StartupCorp</p>
+            <p><strong>Salary:</strong> $120,000 - $150,000</p>
+            <p>Join our innovative team building next-generation web applications with React...</p>
+        </div>
+        <p><strong>Test:</strong> Extension should NOT show "Indeed detected" message</p>
+    </div>
+
+    <div class="glassdoor-simulation">
+        <h3>Glassdoor Jobs Simulation</h3>
+        <div class="job-content">
+            <h4>Data Scientist</h4>
+            <p><strong>Company:</strong> DataTech Solutions</p>
+            <p><strong>Experience:</strong> 3-5 years</p>
+            <p>We're looking for a skilled Data Scientist to analyze complex datasets...</p>
+        </div>
+        <p><strong>Test:</strong> Extension should NOT show "Glassdoor detected" message</p>
+    </div>
+
+    <div class="test-section">
+        <h3>Company Career Page Test</h3>
+        <div class="job-content">
+            <h4>Backend Engineer - Node.js</h4>
+            <p><strong>Company:</strong> CustomCorp Direct Hiring</p>
+            <p><strong>Location:</strong> Remote</p>
+            <p>Direct company posting - we're building scalable microservices with Node.js and Docker...</p>
+        </div>
+        <p><strong>Test:</strong> Should work exactly the same as job board sites</p>
+    </div>
+
+    <div class="checklist">
+        <h3>📋 Manual Testing Checklist</h3>
+        <h4>For Each Test Section Above:</h4>
+        <ol>
+            <li>🔗 <strong>Open Extension:</strong> Click Resume AI extension icon</li>
+            <li>👁️ <strong>Check Status Message:</strong> Should say "Ready for cursor selection on any website"</li>
+            <li>🔘 <strong>Check Button Text:</strong> Should say "Use Cursor Selection Below"</li>
+            <li>🚫 <strong>Verify No Auto-Detection:</strong> Should NOT mention site name (LinkedIn/Indeed/etc.)</li>
+            <li>👆 <strong>Test Selection:</strong> Select any job text, click button</li>
+            <li>✅ <strong>Verify Processing:</strong> Only selected text should be analyzed</li>
+        </ol>
+        
+        <h4>✅ Success Criteria:</h4>
+        <ul>
+            <li>Same behavior on ALL websites</li>
+            <li>No site-specific messages</li>
+            <li>Cursor selection works everywhere</li>
+            <li>No automatic content extraction</li>
+        </ul>
+    </div>
+
+    <script>
+        console.log('🧪 Auto-Extraction Removal Test Page Loaded');
+        console.log('🎯 This page tests that LinkedIn/Indeed/Glassdoor auto-extraction is completely removed');
+        
+        // Track user selections for testing
+        document.addEventListener('selectionchange', function() {
+            const selection = window.getSelection();
+            if (selection.toString().trim().length > 0) {
+                console.log('✂️ User selected text:', selection.toString().substring(0, 100) + '...');
+                console.log('📏 Selection length:', selection.toString().length, 'characters');
+            }
+        });
+
+        // Simulate different URL patterns for testing
+        console.log('🔗 Current URL for testing:', window.location.href);
+        console.log('💡 Test this page as if it were a LinkedIn/Indeed/Glassdoor job posting');
+    </script>
+</body>
+</html>

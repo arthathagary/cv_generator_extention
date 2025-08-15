@@ -41,58 +41,7 @@ class Config {
         };
     }
 
-    static get SUPPORTED_JOB_SITES() {
-        return [
-            {
-                name: 'LinkedIn',
-                pattern: '*://linkedin.com/jobs/*',
-                domain: 'linkedin.com',
-                extractorClass: 'LinkedInExtractor'
-            },
-            {
-                name: 'Indeed',
-                pattern: '*://indeed.com/viewjob*',
-                domain: 'indeed.com',
-                extractorClass: 'IndeedExtractor'
-            },
-            {
-                name: 'Glassdoor',
-                pattern: '*://glassdoor.com/job-listing/*',
-                domain: 'glassdoor.com',
-                extractorClass: 'GlassdoorExtractor'
-            },
-            {
-                name: 'Google Jobs',
-                pattern: '*://jobs.google.com/*',
-                domain: 'jobs.google.com',
-                extractorClass: 'GoogleJobsExtractor'
-            },
-            {
-                name: 'Monster',
-                pattern: '*://*.monster.com/job-openings/*',
-                domain: 'monster.com',
-                extractorClass: 'MonsterExtractor'
-            },
-            {
-                name: 'ZipRecruiter',
-                pattern: '*://*.ziprecruiter.com/jobs/*',
-                domain: 'ziprecruiter.com',
-                extractorClass: 'ZipRecruiterExtractor'
-            },
-            {
-                name: 'Dice',
-                pattern: '*://*.dice.com/jobs/*',
-                domain: 'dice.com',
-                extractorClass: 'DiceExtractor'
-            },
-            {
-                name: 'CareerBuilder',
-                pattern: '*://*.careerbuilder.com/job/*',
-                domain: 'careerbuilder.com',
-                extractorClass: 'CareerBuilderExtractor'
-            }
-        ];
-    }
+    // Removed SUPPORTED_JOB_SITES - now uses universal cursor selection
 
     static get COMMON_SKILLS() {
         return [

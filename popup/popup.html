@@ -72,25 +72,71 @@
             <div class="results-section" id="results-section" style="display: none;">
                 <h3>Extraction Results</h3>
                 <div id="job-summary" class="job-summary"></div>
+                
+                <!-- ATS Score Section -->
+                <div id="ats-score-section" class="ats-score-section" style="display: none;">
+                    <h3>ATS Compatibility Score</h3>
+                    <div class="score-container">
+                        <div class="score-circle">
+                            <div id="score-percentage" class="score-percentage">--</div>
+                            <div class="score-label">ATS Score</div>
+                        </div>
+                        <div class="score-details">
+                            <div id="score-breakdown" class="score-breakdown">
+                                <div class="score-item">
+                                    <span class="score-category">Keywords Match:</span>
+                                    <span id="keywords-score" class="score-value">--</span>
+                                </div>
+                                <div class="score-item">
+                                    <span class="score-category">Skills Alignment:</span>
+                                    <span id="skills-score" class="score-value">--</span>
+                                </div>
+                                <div class="score-item">
+                                    <span class="score-category">Experience Match:</span>
+                                    <span id="experience-score" class="score-value">--</span>
+                                </div>
+                                <div class="score-item">
+                                    <span class="score-category">Format Optimization:</span>
+                                    <span id="format-score" class="score-value">--</span>
+                                </div>
+                            </div>
+                            <div id="score-recommendations" class="score-recommendations" style="display: none;">
+                                <h4>Recommendations to Improve:</h4>
+                                <ul id="recommendations-list"></ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="score-actions">
+                        <button id="improve-cv" class="btn btn-secondary" style="display: none;">
+                            <span class="btn-icon">⚡</span>
+                            Auto-Improve CV
+                        </button>
+                        <button id="show-recommendations" class="btn btn-outline">
+                            <span class="btn-icon">💡</span>
+                            Show Recommendations
+                        </button>
+                    </div>
+                </div>
+                
                 <div class="actions">
-                    <button id="download-cv" class="btn btn-download">
+                    <button id="download-cv" class="btn btn-download" style="display: none;">
                         <span class="btn-icon">⬇️</span>
                         Download CV
                     </button>
-                    <button id="edit-cv" class="btn btn-edit">
+                    <!-- <button id="edit-cv" class="btn btn-edit">
                         <span class="btn-icon">✏️</span>
                         Edit & Improve
-                    </button>
+                    </button> -->
                 </div>
             </div>
         </main>
 
-        <footer>
+        <!-- <footer>
             <div class="settings">
                 <button id="settings-btn" class="icon-btn" title="Settings">⚙️</button>
                 <button id="help-btn" class="icon-btn" title="Help">❓</button>
             </div>
-        </footer>
+        </footer> -->
     </div>
 
     <script src="../jspdf.min.js"></script>

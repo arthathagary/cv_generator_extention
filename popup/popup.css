@@ -800,3 +800,191 @@ footer {
 .analysis-actions .btn {
     flex: 0 0 auto;
 }
+
+/* ATS Score Section Styles */
+.ats-score-section {
+    margin: 20px 0;
+    padding: 20px;
+    background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%);
+    border-radius: 12px;
+    border: 2px solid #e3f2fd;
+}
+
+.ats-score-section h3 {
+    color: #1976d2;
+    margin-bottom: 15px;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.score-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.score-circle {
+    flex-shrink: 0;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, #4caf50 0deg, #4caf50 var(--score-angle, 0deg), #e0e0e0 var(--score-angle, 0deg));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    border: 4px solid white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.score-circle::before {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background: white;
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.score-percentage {
+    position: relative;
+    z-index: 2;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1976d2;
+    line-height: 1;
+}
+
+.score-label {
+    position: relative;
+    z-index: 2;
+    font-size: 8px;
+    color: #666;
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+.score-details {
+    flex: 1;
+}
+
+.score-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.score-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid #e3f2fd;
+}
+
+.score-item:last-child {
+    border-bottom: none;
+}
+
+.score-category {
+    font-size: 12px;
+    color: #555;
+    font-weight: 500;
+}
+
+.score-value {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+    color: white;
+}
+
+.score-value.excellent {
+    background: #4caf50;
+}
+
+.score-value.good {
+    background: #8bc34a;
+}
+
+.score-value.fair {
+    background: #ff9800;
+}
+
+.score-value.poor {
+    background: #f44336;
+}
+
+.score-recommendations {
+    margin-top: 15px;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    border-left: 4px solid #ff9800;
+}
+
+.score-recommendations h4 {
+    color: #ff9800;
+    font-size: 14px;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.score-recommendations ul {
+    list-style: none;
+    padding: 0;
+}
+
+.score-recommendations li {
+    font-size: 12px;
+    color: #666;
+    padding: 4px 0;
+    padding-left: 16px;
+    position: relative;
+}
+
+.score-recommendations li::before {
+    content: '•';
+    color: #ff9800;
+    position: absolute;
+    left: 0;
+    font-weight: bold;
+}
+
+.score-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    justify-content: center;
+}
+
+.score-actions .btn {
+    font-size: 12px;
+    padding: 8px 12px;
+}
+
+/* Color variations for different score ranges */
+.score-circle.excellent {
+    background: conic-gradient(from 0deg, #4caf50 0deg, #4caf50 var(--score-angle, 0deg), #e0e0e0 var(--score-angle, 0deg));
+}
+
+.score-circle.good {
+    background: conic-gradient(from 0deg, #8bc34a 0deg, #8bc34a var(--score-angle, 0deg), #e0e0e0 var(--score-angle, 0deg));
+}
+
+.score-circle.fair {
+    background: conic-gradient(from 0deg, #ff9800 0deg, #ff9800 var(--score-angle, 0deg), #e0e0e0 var(--score-angle, 0deg));
+}
+
+.score-circle.poor {
+    background: conic-gradient(from 0deg, #f44336 0deg, #f44336 var(--score-angle, 0deg), #e0e0e0 var(--score-angle, 0deg));
+}
+
+/* Hide download button until score is shown */
+#download-cv.hidden {
+    display: none !important;
+}

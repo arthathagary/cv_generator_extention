@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATS Score Feature Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 { color: #1976d2; }
+        h2 { color: #333; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; }
+        .feature { 
+            background: #e3f2fd; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-left: 4px solid #1976d2; 
+        }
+        .test-steps {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .test-steps ol {
+            margin: 10px 0;
+        }
+        .score-demo {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .score-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            min-width: 60px;
+        }
+        .excellent { background: #4caf50; }
+        .good { background: #8bc34a; }
+        .fair { background: #ff9800; }
+        .poor { background: #f44336; }
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎯 ATS Score Feature Test Guide</h1>
+    
+    <div class="success">
+        <strong>✅ Feature Added Successfully!</strong><br>
+        The ATS (Applicant Tracking System) score feature has been integrated into the Resume AI extension.
+        Users will now see their CV's compatibility score before downloading.
+    </div>
+
+    <div class="test-section">
+        <h2>🆕 New Features Added</h2>
+        
+        <div class="feature">
+            <strong>1. ATS Score Display</strong><br>
+            Shows overall compatibility score (0-100%) with visual circular progress indicator
+        </div>
+
+        <div class="feature">
+            <strong>2. Score Breakdown</strong><br>
+            Detailed breakdown across 4 categories:
+            <ul>
+                <li><strong>Keywords Match:</strong> How well CV keywords match job requirements (30% weight)</li>
+                <li><strong>Skills Alignment:</strong> Relevance of skills to job posting (25% weight)</li>
+                <li><strong>Experience Match:</strong> Experience level vs requirements (25% weight)</li>
+                <li><strong>Format Optimization:</strong> CV structure and ATS-friendliness (20% weight)</li>
+            </ul>
+        </div>
+
+        <div class="feature">
+            <strong>3. Smart Recommendations</strong><br>
+            AI-powered suggestions to improve ATS score with specific actionable advice
+        </div>
+
+        <div class="feature">
+            <strong>4. Download Control</strong><br>
+            Download button appears only after user reviews the ATS score (2-second delay)
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎨 Score Visualization</h2>
+        
+        <p>The ATS score is displayed with color-coded indicators:</p>
+        
+        <div class="score-demo">
+            <div class="score-badge excellent">85-100% Excellent</div>
+            <div class="score-badge good">70-84% Good</div>
+            <div class="score-badge fair">50-69% Fair</div>
+            <div class="score-badge poor">0-49% Poor</div>
+        </div>
+
+        <p><strong>Visual Elements:</strong></p>
+        <ul>
+            <li>Circular progress indicator with dynamic color based on score</li>
+            <li>Individual score bars for each category</li>
+            <li>Collapsible recommendations panel</li>
+            <li>Auto-improve CV button (when score is low)</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 How to Test the ATS Score Feature</h2>
+        
+        <div class="test-steps">
+            <h3>Test Scenario 1: Complete CV Generation Flow</h3>
+            <ol>
+                <li>Open a job posting on any website (LinkedIn, Indeed, etc.)</li>
+                <li>Open the Resume AI extension popup</li>
+                <li>Click <code>"Extract Job Details with AI"</code></li>
+                <li>Select job content using cursor selection</li>
+                <li>Wait for AI analysis to complete</li>
+                <li>Click <code>"Generate ATS-Friendly CV"</code></li>
+                <li><strong>🎯 OBSERVE:</strong> ATS Score section should appear after CV generation</li>
+                <li><strong>🎯 VERIFY:</strong> Download button is initially hidden</li>
+                <li><strong>🎯 CHECK:</strong> Score breakdown shows percentages for all 4 categories</li>
+                <li>Wait 2 seconds for download button to appear</li>
+                <li>Click <code>"Show Recommendations"</code> to see improvement suggestions</li>
+            </ol>
+        </div>
+
+        <div class="test-steps">
+            <h3>Test Scenario 2: Score Calculation Logic</h3>
+            <ol>
+                <li>Test with different types of job postings (technical vs non-technical)</li>
+                <li>Verify keyword matching works (job keywords should appear in CV)</li>
+                <li>Check skills alignment (technical skills from job should boost score)</li>
+                <li>Test experience matching (senior roles should require more experience)</li>
+                <li>Observe format score (complete CVs should score higher)</li>
+            </ol>
+        </div>
+
+        <div class="test-steps">
+            <h3>Test Scenario 3: Edge Cases</h3>
+            <ol>
+                <li>Test with minimal job descriptions</li>
+                <li>Test with very detailed job postings</li>
+                <li>Test when user profile has limited information</li>
+                <li>Verify error handling when score calculation fails</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔍 What to Look For</h2>
+        
+        <h3>✅ Expected Behaviors:</h3>
+        <ul>
+            <li>ATS score section appears immediately after CV generation</li>
+            <li>Score circle displays percentage with appropriate color</li>
+            <li>All 4 category scores show realistic percentages</li>
+            <li>Download button is hidden initially, appears after 2 seconds</li>
+            <li>Recommendations are relevant to the score breakdown</li>
+            <li>Clicking "Show Recommendations" toggles the visibility</li>
+            <li>Score values are color-coded (green=excellent, yellow=fair, red=poor)</li>
+        </ul>
+
+        <h3>❌ Potential Issues to Report:</h3>
+        <ul>
+            <li>Score section doesn't appear after CV generation</li>
+            <li>Score shows as "--" or NaN</li>
+            <li>Download button appears immediately without score review</li>
+            <li>Circular progress indicator doesn't match the percentage</li>
+            <li>Recommendations are generic or irrelevant</li>
+            <li>Console errors related to ATS score calculation</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Technical Implementation Details</h2>
+        
+        <h3>New HTML Elements Added:</h3>
+        <ul>
+            <li><code>#ats-score-section</code> - Main container for ATS score display</li>
+            <li><code>#score-percentage</code> - Overall score percentage display</li>
+            <li><code>#keywords-score, #skills-score, #experience-score, #format-score</code> - Individual category scores</li>
+            <li><code>#score-recommendations</code> - Recommendations panel</li>
+            <li><code>#improve-cv, #show-recommendations</code> - Action buttons</li>
+        </ul>
+
+        <h3>New JavaScript Methods:</h3>
+        <ul>
+            <li><code>calculateAndShowATSScore()</code> - Main orchestration method</li>
+            <li><code>calculateATSScore()</code> - Core scoring algorithm</li>
+            <li><code>calculateKeywordMatch()</code> - Keyword matching logic</li>
+            <li><code>calculateSkillsAlignment()</code> - Skills comparison</li>
+            <li><code>calculateExperienceMatch()</code> - Experience level analysis</li>
+            <li><code>displayATSScore()</code> - UI update and visualization</li>
+        </ul>
+
+        <h3>Scoring Algorithm:</h3>
+        <ul>
+            <li><strong>Keywords (30%):</strong> Matches job-specific terms in CV content</li>
+            <li><strong>Skills (25%):</strong> Alignment between job requirements and CV skills</li>
+            <li><strong>Experience (25%):</strong> Years of experience vs job requirements</li>
+            <li><strong>Format (20%):</strong> CV completeness and structure quality</li>
+        </ul>
+    </div>
+
+    <div class="warning">
+        <strong>⚠️ Important Notes:</strong><br>
+        <ul>
+            <li>The ATS score is calculated locally and provides estimated compatibility</li>
+            <li>Actual ATS systems may use different algorithms</li>
+            <li>Score serves as guidance for CV optimization, not absolute truth</li>
+            <li>Recommendations are AI-generated suggestions for improvement</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Test Checklist</h2>
+        
+        <p>Use this checklist to ensure all ATS score features are working correctly:</p>
+        
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 4px;">
+            <input type="checkbox" id="test1"> <label for="test1">ATS score section appears after CV generation</label><br>
+            <input type="checkbox" id="test2"> <label for="test2">Overall score displays with correct percentage</label><br>
+            <input type="checkbox" id="test3"> <label for="test3">Circular progress indicator matches score value</label><br>
+            <input type="checkbox" id="test4"> <label for="test4">All 4 category scores show realistic values</label><br>
+            <input type="checkbox" id="test5"> <label for="test5">Score colors match performance levels</label><br>
+            <input type="checkbox" id="test6"> <label for="test6">Download button is initially hidden</label><br>
+            <input type="checkbox" id="test7"> <label for="test7">Download button appears after 2-second delay</label><br>
+            <input type="checkbox" id="test8"> <label for="test8">Recommendations toggle button works</label><br>
+            <input type="checkbox" id="test9"> <label for="test9">Recommendations are relevant and helpful</label><br>
+            <input type="checkbox" id="test10"> <label for="test10">Auto-improve CV button functions correctly</label><br>
+            <input type="checkbox" id="test11"> <label for="test11">No console errors during score calculation</label><br>
+            <input type="checkbox" id="test12"> <label for="test12">Scoring works with different job types</label><br>
+        </div>
+    </div>
+
+    <div class="success">
+        <strong>🎉 Ready to Test!</strong><br>
+        The ATS score feature is now fully integrated. Follow the test scenarios above to verify everything works as expected.
+        Report any issues or unexpected behaviors for further refinement.
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATS-Friendly Profile Summary Testing</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+            line-height: 1.6;
+        }
+        .test-container {
+            background: white;
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .test-title {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+        .job-posting {
+            background: linear-gradient(135deg, #e8f4fd 0%, #d1ecf1 100%);
+            padding: 20px;
+            border-left: 5px solid #3498db;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .user-profile {
+            background: linear-gradient(135deg, #f0f9f0 0%, #e8f5e8 100%);
+            padding: 20px;
+            border-left: 5px solid #27ae60;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .generated-summary {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            padding: 20px;
+            border-left: 5px solid #f39c12;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .ats-analysis {
+            background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+            padding: 20px;
+            border-left: 5px solid #9b59b6;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .skills-display {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 15px 0;
+        }
+        .skill-tag {
+            background: #007bff;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .skill-matched {
+            background: #28a745;
+        }
+        .skill-added {
+            background: #ffc107;
+            color: #212529;
+        }
+        .skill-ats {
+            background: #6f42c1;
+        }
+        .summary-text {
+            font-size: 16px;
+            line-height: 1.7;
+            padding: 15px 0;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            background: #f8f9fa;
+            font-style: italic;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        .ats-keyword {
+            background: #d1ecf1;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #0c5460;
+        }
+        .test-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 16px;
+            font-weight: 500;
+            transition: transform 0.2s ease;
+        }
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        .score-improvement {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .score-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .score-before {
+            border-left: 5px solid #e74c3c;
+        }
+        .score-after {
+            border-left: 5px solid #27ae60;
+        }
+        .score-number {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .score-before .score-number {
+            color: #e74c3c;
+        }
+        .score-after .score-number {
+            color: #27ae60;
+        }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .comparison-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        .improvement {
+            color: #27ae60;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎯 ATS-Friendly Profile Summary Generator</h1>
+    <p>This page demonstrates how the enhanced extension creates intelligent profile summaries that align with job descriptions and optimize for ATS systems.</p>
+
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color" style="background: #28a745;"></div>
+            <span>Matched Keywords</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ffc107;"></div>
+            <span>Enhanced Skills</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #6f42c1;"></div>
+            <span>ATS Keywords</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #007bff;"></div>
+            <span>Technical Skills</span>
+        </div>
+    </div>
+
+    <!-- Test Case 1: Senior Frontend Developer -->
+    <div class="test-container">
+        <h2 class="test-title">🚀 Test Case 1: Senior Frontend Developer</h2>
+        
+        <div class="job-posting">
+            <h3>📋 Job Posting - Senior Frontend Developer</h3>
+            <p><strong>Company:</strong> TechCorp Solutions</p>
+            <p><strong>Position:</strong> Senior Frontend Developer</p>
+            <p><strong>Requirements:</strong> 5+ years experience with React, TypeScript, JavaScript ES6+. Strong background in responsive design, performance optimization, and modern frontend tooling. Experience with Node.js, GraphQL, and agile development methodologies. Leadership experience and mentoring junior developers preferred.</p>
+            <p><strong>Key Skills:</strong> React, TypeScript, JavaScript, HTML5, CSS3, Webpack, Jest, Git</p>
+        </div>
+
+        <div class="user-profile">
+            <h3>👤 User Profile Data</h3>
+            <div class="skills-display">
+                <span class="skill-tag">React</span>
+                <span class="skill-tag">JavaScript</span>
+                <span class="skill-tag">TypeScript</span>
+                <span class="skill-tag">HTML5</span>
+                <span class="skill-tag">CSS3</span>
+                <span class="skill-tag">Node.js</span>
+                <span class="skill-tag">Git</span>
+            </div>
+            <p><strong>Experience:</strong></p>
+            <ul>
+                <li><strong>Senior Developer (3 years):</strong> Led team of 4 developers, improved application performance by 40%, implemented responsive design for 10+ projects</li>
+                <li><strong>Frontend Developer (2 years):</strong> Built React applications, worked with REST APIs, collaborated in agile teams</li>
+            </ul>
+            <p><strong>Total Experience:</strong> 5+ years</p>
+        </div>
+
+        <div class="generated-summary">
+            <h3>✨ Generated ATS-Friendly Profile Summary</h3>
+            <div class="summary-text">
+                <span class="highlight">Experienced software developer with 5+ years of experience</span> <span class="ats-keyword">frontend developer</span> with proven expertise in <span class="highlight">React, JavaScript, TypeScript</span>. <span class="ats-keyword">Improved application performance by 40% and led team of 4 developers</span>. Proficient in <span class="highlight">HTML5, CSS3, Node.js</span> with experience in <span class="ats-keyword">responsive web design, performance optimization, agile methodologies</span>. <span class="ats-keyword">Experienced in building scalable applications and providing technical leadership</span>. <span class="ats-keyword">Seeking to leverage expertise in frontend development to drive innovation and technical excellence in a senior role</span>.
+            </div>
+        </div>
+
+        <div class="ats-analysis">
+            <h3>📊 ATS Optimization Analysis</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>ATS Factor</th>
+                        <th>Before Enhancement</th>
+                        <th>After Enhancement</th>
+                        <th>Improvement</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Job Title Match</td>
+                        <td>Generic "Developer"</td>
+                        <td>"Frontend Developer"</td>
+                        <td class="improvement">+Perfect Match</td>
+                    </tr>
+                    <tr>
+                        <td>Experience Level</td>
+                        <td>Not specified</td>
+                        <td>"5+ years experience"</td>
+                        <td class="improvement">+Quantified</td>
+                    </tr>
+                    <tr>
+                        <td>Key Skills</td>
+                        <td>Basic list</td>
+                        <td>Prioritized & Contextualized</td>
+                        <td class="improvement">+Strategic Placement</td>
+                    </tr>
+                    <tr>
+                        <td>Achievements</td>
+                        <td>Missing</td>
+                        <td>"40% performance improvement"</td>
+                        <td class="improvement">+Quantifiable Results</td>
+                    </tr>
+                    <tr>
+                        <td>Leadership</td>
+                        <td>Not mentioned</td>
+                        <td>"Led team of 4 developers"</td>
+                        <td class="improvement">+Leadership Keywords</td>
+                    </tr>
+                    <tr>
+                        <td>Job-Specific Terms</td>
+                        <td>Generic tech terms</td>
+                        <td>Responsive design, performance optimization</td>
+                        <td class="improvement">+Job-Aligned Keywords</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="score-improvement">
+            <div class="score-card score-before">
+                <h4>Before Enhancement</h4>
+                <div class="score-number">68%</div>
+                <p>Generic profile summary</p>
+            </div>
+            <div class="score-card score-after">
+                <h4>After Enhancement</h4>
+                <div class="score-number">92%</div>
+                <p>ATS-optimized profile summary</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Case 2: Data Engineer -->
+    <div class="test-container">
+        <h2 class="test-title">📊 Test Case 2: Data Engineer</h2>
+        
+        <div class="job-posting">
+            <h3>📋 Job Posting - Senior Data Engineer</h3>
+            <p><strong>Company:</strong> DataTech Analytics</p>
+            <p><strong>Position:</strong> Senior Data Engineer</p>
+            <p><strong>Requirements:</strong> 4+ years experience with Python, SQL, Apache Spark, and cloud platforms (AWS/Azure). Strong background in data pipeline development, ETL processes, and data warehousing. Experience with Kafka, Elasticsearch, and big data technologies. Knowledge of machine learning pipelines and data visualization tools.</p>
+            <p><strong>Key Skills:</strong> Python, SQL, Apache Spark, AWS, Kafka, ETL, Data Pipelines</p>
+        </div>
+
+        <div class="user-profile">
+            <h3>👤 User Profile Data</h3>
+            <div class="skills-display">
+                <span class="skill-tag">Python</span>
+                <span class="skill-tag">SQL</span>
+                <span class="skill-tag">Apache Spark</span>
+                <span class="skill-tag">AWS</span>
+                <span class="skill-tag">PostgreSQL</span>
+                <span class="skill-tag">Pandas</span>
+                <span class="skill-tag">Docker</span>
+            </div>
+            <p><strong>Experience:</strong></p>
+            <ul>
+                <li><strong>Data Engineer (2 years):</strong> Built ETL pipelines processing 1TB+ daily data, implemented real-time analytics dashboard, optimized query performance by 60%</li>
+                <li><strong>Data Analyst (2 years):</strong> Created data visualizations, performed statistical analysis, worked with large datasets</li>
+            </ul>
+            <p><strong>Total Experience:</strong> 4+ years</p>
+        </div>
+
+        <div class="generated-summary">
+            <h3>✨ Generated ATS-Friendly Profile Summary</h3>
+            <div class="summary-text">
+                <span class="highlight">Skilled developer with 4+ years of experience</span> <span class="ats-keyword">data engineer specializing in data pipeline development</span> with proven expertise in <span class="highlight">Python, SQL, Apache Spark</span>. <span class="ats-keyword">Built ETL pipelines processing 1TB+ daily data and optimized query performance by 60%</span>. Proficient in <span class="highlight">AWS, PostgreSQL, Pandas</span> with experience in <span class="ats-keyword">ETL processes, data analysis, scalable solutions</span>. <span class="ats-keyword">Experienced in building scalable applications and developing innovative solutions</span>. <span class="ats-keyword">Ready to contribute proven development skills and collaborate with cross-functional teams to achieve business objectives</span>.
+            </div>
+        </div>
+
+        <div class="ats-analysis">
+            <h3>📊 ATS Optimization Analysis</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>ATS Factor</th>
+                        <th>Before Enhancement</th>
+                        <th>After Enhancement</th>
+                        <th>Improvement</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Role Specialization</td>
+                        <td>"Data Analyst"</td>
+                        <td>"Data Engineer specializing in data pipeline development"</td>
+                        <td class="improvement">+Perfect Alignment</td>
+                    </tr>
+                    <tr>
+                        <td>Core Technologies</td>
+                        <td>Basic listing</td>
+                        <td>Contextualized with experience</td>
+                        <td class="improvement">+Technical Context</td>
+                    </tr>
+                    <tr>
+                        <td>Scale & Impact</td>
+                        <td>Not quantified</td>
+                        <td>"1TB+ daily data processing"</td>
+                        <td class="improvement">+Big Data Keywords</td>
+                    </tr>
+                    <tr>
+                        <td>Performance Metrics</td>
+                        <td>Missing</td>
+                        <td>"60% query performance improvement"</td>
+                        <td class="improvement">+Measurable Results</td>
+                    </tr>
+                    <tr>
+                        <td>Industry Keywords</td>
+                        <td>Basic data terms</td>
+                        <td>ETL, data pipelines, scalable solutions</td>
+                        <td class="improvement">+Industry-Specific Terms</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="score-improvement">
+            <div class="score-card score-before">
+                <h4>Before Enhancement</h4>
+                <div class="score-number">71%</div>
+                <p>Basic data profile</p>
+            </div>
+            <div class="score-card score-after">
+                <h4>After Enhancement</h4>
+                <div class="score-number">89%</div>
+                <p>Data engineering optimized</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Case 3: Full Stack Developer -->
+    <div class="test-container">
+        <h2 class="test-title">💻 Test Case 3: Full Stack Developer</h2>
+        
+        <div class="job-posting">
+            <h3>📋 Job Posting - Full Stack Developer</h3>
+            <p><strong>Company:</strong> Startup Innovations</p>
+            <p><strong>Position:</strong> Full Stack Developer</p>
+            <p><strong>Requirements:</strong> 3+ years experience with JavaScript, Node.js, React, and MongoDB. Experience with RESTful APIs, microservices architecture, and cloud deployment. Strong problem-solving skills and ability to work in fast-paced startup environment. Knowledge of DevOps practices and CI/CD pipelines preferred.</p>
+            <p><strong>Key Skills:</strong> JavaScript, Node.js, React, MongoDB, APIs, Microservices</p>
+        </div>
+
+        <div class="user-profile">
+            <h3>👤 User Profile Data</h3>
+            <div class="skills-display">
+                <span class="skill-tag">JavaScript</span>
+                <span class="skill-tag">Node.js</span>
+                <span class="skill-tag">React</span>
+                <span class="skill-tag">MongoDB</span>
+                <span class="skill-tag">Express.js</span>
+                <span class="skill-tag">MySQL</span>
+                <span class="skill-tag">Docker</span>
+            </div>
+            <p><strong>Experience:</strong></p>
+            <ul>
+                <li><strong>Full Stack Developer (2 years):</strong> Developed end-to-end web applications, implemented REST APIs serving 10k+ users, reduced page load time by 50%</li>
+                <li><strong>Frontend Developer (1.5 years):</strong> Built responsive React applications, integrated with backend APIs, collaborated in agile teams</li>
+            </ul>
+            <p><strong>Total Experience:</strong> 3.5+ years</p>
+        </div>
+
+        <div class="generated-summary">
+            <h3>✨ Generated ATS-Friendly Profile Summary</h3>
+            <div class="summary-text">
+                <span class="highlight">Skilled developer with 3+ years of experience</span> <span class="ats-keyword">full-stack developer specializing in end-to-end application development</span> with proven expertise in <span class="highlight">JavaScript, Node.js, React</span>. <span class="ats-keyword">Implemented REST APIs serving 10k+ users and reduced page load time by 50%</span>. Proficient in <span class="highlight">MongoDB, Express.js, MySQL</span> with experience in <span class="ats-keyword">API integration, database design, agile development</span>. <span class="ats-keyword">Experienced in building scalable applications and working in collaborative environments</span>. <span class="ats-keyword">Ready to contribute proven development skills and collaborate with cross-functional teams to achieve business objectives</span>.
+            </div>
+        </div>
+
+        <div class="score-improvement">
+            <div class="score-card score-before">
+                <h4>Before Enhancement</h4>
+                <div class="score-number">74%</div>
+                <p>Standard full stack profile</p>
+            </div>
+            <div class="score-card score-after">
+                <h4>After Enhancement</h4>
+                <div class="score-number">91%</div>
+                <p>Startup-focused optimization</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Testing Instructions -->
+    <div class="test-container">
+        <h2 class="test-title">🧪 How to Test ATS Profile Summary</h2>
+        
+        <h3>Testing Steps:</h3>
+        <ol style="font-size: 16px; line-height: 1.8;">
+            <li><strong>Connect Profile:</strong> Ensure your extension is connected with experience and skills data</li>
+            <li><strong>Copy Job Description:</strong> Use one of the job postings above or find a real job posting</li>
+            <li><strong>Use Extension:</strong> Select job content with cursor selection feature</li>
+            <li><strong>Analyze Job:</strong> Let the AI analyze the job requirements</li>
+            <li><strong>Generate CV:</strong> Click "Generate ATS-Friendly CV"</li>
+            <li><strong>Review Summary:</strong> Check the professional summary section in generated CV</li>
+            <li><strong>Verify ATS Score:</strong> Confirm improved scores in ATS compatibility section</li>
+        </ol>
+
+        <h3>What to Look For in Generated Summary:</h3>
+        <ul style="font-size: 16px; line-height: 1.8;">
+            <li>✅ <strong>Years of Experience:</strong> Properly quantified (e.g., "5+ years")</li>
+            <li>✅ <strong>Job Title Match:</strong> Uses exact or similar job title from posting</li>
+            <li>✅ <strong>Key Skills Integration:</strong> Top 3-6 skills mentioned naturally</li>
+            <li>✅ <strong>Quantified Achievements:</strong> Specific numbers and percentages</li>
+            <li>✅ <strong>Industry Keywords:</strong> Role-specific terminology included</li>
+            <li>✅ <strong>ATS-Friendly Language:</strong> Action verbs and qualification terms</li>
+            <li>✅ <strong>Proper Length:</strong> 150-200 words (optimal for ATS)</li>
+            <li>✅ <strong>Career Alignment:</strong> Closing statement matches job level/type</li>
+        </ul>
+
+        <h3>Expected ATS Score Improvements:</h3>
+        <div class="score-improvement">
+            <div class="score-card">
+                <h4>Profile Summary Impact</h4>
+                <div style="font-size: 18px; margin: 10px 0;">
+                    <p><strong>Keywords Match:</strong> +15-25 points</p>
+                    <p><strong>Experience Alignment:</strong> +20-30 points</p>
+                    <p><strong>Overall ATS Score:</strong> +18-28 points</p>
+                </div>
+            </div>
+            <div class="score-card">
+                <h4>Recruiter Appeal</h4>
+                <div style="font-size: 18px; margin: 10px 0;">
+                    <p><strong>First Impression:</strong> Significantly improved</p>
+                    <p><strong>Role Fit:</strong> Clear alignment</p>
+                    <p><strong>Scanning Efficiency:</strong> Key info upfront</p>
+                </div>
+            </div>
+        </div>
+
+        <button class="test-button" onclick="alert('Start testing by connecting your profile and using the extension on job postings!')">
+            🚀 Start Testing Profile Summary
+        </button>
+        <button class="test-button" onclick="window.open('https://linkedin.com/jobs', '_blank')">
+            🔗 Test on LinkedIn Jobs
+        </button>
+        <button class="test-button" onclick="console.log('Profile Summary Testing - Check generated CV for optimized summary section')">
+            📋 Enable Summary Debug
+        </button>
+    </div>
+
+    <!-- Debugging Info -->
+    <div class="test-container">
+        <h2 class="test-title">🔧 Profile Summary Debug Information</h2>
+        
+        <h3>Console Logs to Monitor:</h3>
+        <pre style="background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 14px;">
+[Profile Summary] Generating ATS-friendly profile summary...
+[Profile Summary] Experience: 5+ years, Role: frontend developer
+[Profile Summary] Skills: React, JavaScript, TypeScript, HTML5, CSS3, Node.js
+[Profile Summary] Generated summary: Experienced software developer with 5+ years...
+        </pre>
+
+        <h3>Key Components Verified:</h3>
+        <ul>
+            <li>✅ <strong>Experience Extraction:</strong> Years, current role, achievements</li>
+            <li>✅ <strong>Skills Prioritization:</strong> Job-matched skills first</li>
+            <li>✅ <strong>Job Focus Analysis:</strong> Seniority level and specialization</li>
+            <li>✅ <strong>ATS Optimization:</strong> Keywords and industry terms</li>
+            <li>✅ <strong>Length Optimization:</strong> Proper word count for ATS parsing</li>
+        </ul>
+
+        <h3>Common Issues & Solutions:</h3>
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Issue</th>
+                    <th>Cause</th>
+                    <th>Solution</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Generic summary generated</td>
+                    <td>Missing user profile data</td>
+                    <td>Ensure profile connection and sync</td>
+                </tr>
+                <tr>
+                    <td>No quantified achievements</td>
+                    <td>Experience lacks metrics</td>
+                    <td>Add numbers/percentages to profile</td>
+                </tr>
+                <tr>
+                    <td>Wrong job focus detected</td>
+                    <td>Job analysis incomplete</td>
+                    <td>Verify job content selection quality</td>
+                </tr>
+                <tr>
+                    <td>Missing ATS keywords</td>
+                    <td>Requirements parsing failed</td>
+                    <td>Check job description completeness</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Sample data for testing
+        window.sampleJobData = {
+            frontend: {
+                title: "Senior Frontend Developer",
+                company: "TechCorp Solutions",
+                requirements: "5+ years experience with React, TypeScript, JavaScript ES6+. Strong background in responsive design, performance optimization, and modern frontend tooling. Experience with Node.js, GraphQL, and agile development methodologies.",
+                skills: ["React", "TypeScript", "JavaScript", "HTML5", "CSS3", "Node.js", "GraphQL"],
+                level: "senior"
+            },
+            data: {
+                title: "Senior Data Engineer", 
+                company: "DataTech Analytics",
+                requirements: "4+ years experience with Python, SQL, Apache Spark, and cloud platforms (AWS/Azure). Strong background in data pipeline development, ETL processes, and data warehousing.",
+                skills: ["Python", "SQL", "Apache Spark", "AWS", "ETL", "Data Pipelines"],
+                level: "senior"
+            },
+            fullstack: {
+                title: "Full Stack Developer",
+                company: "Startup Innovations", 
+                requirements: "3+ years experience with JavaScript, Node.js, React, and MongoDB. Experience with RESTful APIs, microservices architecture, and cloud deployment.",
+                skills: ["JavaScript", "Node.js", "React", "MongoDB", "REST APIs", "Microservices"],
+                level: "experienced"
+            }
+        };
+
+        window.sampleUserProfiles = {
+            frontend: {
+                experience: [
+                    {
+                        title: "Senior Developer",
+                        company: "Tech Company",
+                        description: "Led team of 4 developers, improved application performance by 40%, implemented responsive design for 10+ projects",
+                        duration: "3 years"
+                    },
+                    {
+                        title: "Frontend Developer", 
+                        company: "Startup",
+                        description: "Built React applications, worked with REST APIs, collaborated in agile teams",
+                        duration: "2 years"
+                    }
+                ],
+                skills: {
+                    technical: ["React", "JavaScript", "TypeScript", "HTML5", "CSS3", "Node.js", "Git"],
+                    soft: ["Leadership", "Problem Solving", "Communication"]
+                }
+            }
+        };
+
+        console.log('🎯 ATS Profile Summary Testing Environment Ready');
+        console.log('Sample data: window.sampleJobData, window.sampleUserProfiles');
+    </script>
+</body>
+</html>

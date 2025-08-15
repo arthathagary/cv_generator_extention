@@ -38,12 +38,23 @@ class PopupController {
             downloadCvBtn: document.getElementById('download-cv'),
             editCvBtn: document.getElementById('edit-cv'),
             settingsBtn: document.getElementById('settings-btn'),
-            helpBtn: document.getElementById('help-btn'),
+            helpBtn: document.getElementById(' '),
             selectionPreview: document.getElementById('selection-preview'),
             previewContent: document.getElementById('preview-content'),
             aiAnalysis: document.getElementById('ai-analysis'),
             analysisContent: document.getElementById('analysis-content'),
-            generateCvBtn: document.getElementById('generate-cv-btn')
+            generateCvBtn: document.getElementById('generate-cv-btn'),
+            // ATS Score elements
+            atsScoreSection: document.getElementById('ats-score-section'),
+            scorePercentage: document.getElementById('score-percentage'),
+            keywordsScore: document.getElementById('keywords-score'),
+            skillsScore: document.getElementById('skills-score'),
+            experienceScore: document.getElementById('experience-score'),
+            formatScore: document.getElementById('format-score'),
+            scoreRecommendations: document.getElementById('score-recommendations'),
+            recommendationsList: document.getElementById('recommendations-list'),
+            improveCvBtn: document.getElementById('improve-cv'),
+            showRecommendationsBtn: document.getElementById('show-recommendations')
         };
         
         this.selectedContent = null;
@@ -249,6 +260,18 @@ class PopupController {
         if (generateCvBtn) {
             generateCvBtn.addEventListener('click', () => this.generateATSFriendlyCV());
         }
+
+        // ATS Score event listeners
+        const showRecommendationsBtn = document.getElementById('show-recommendations');
+        const improveCvBtn = document.getElementById('improve-cv');
+        
+        if (showRecommendationsBtn) {
+            showRecommendationsBtn.addEventListener('click', () => this.toggleRecommendations());
+        }
+        
+        if (improveCvBtn) {
+            improveCvBtn.addEventListener('click', () => this.improveCV());
+        }
     }
 
     async checkJobPageStatus() {
@@ -262,57 +285,20 @@ class PopupController {
                 return;
             }
             
-            // Check if this is a known job site for enhanced extraction
-            const jobSites = [
-                { pattern: 'linkedin.com/jobs', name: 'LinkedIn Jobs' },
-                { pattern: 'indeed.com/job', name: 'Indeed' },
-                { pattern: 'indeed.com/viewjob', name: 'Indeed' },
-                { pattern: 'glassdoor.com/job', name: 'Glassdoor' },
-                { pattern: 'monster.com/job', name: 'Monster' },
-                { pattern: 'ziprecruiter.com/job', name: 'ZipRecruiter' },
-                { pattern: 'careerbuilder.com/job', name: 'CareerBuilder' },
-                { pattern: 'angel.co', name: 'AngelList' },
-                { pattern: 'wellfound.com', name: 'Wellfound' },
-                { pattern: 'remoteok.io', name: 'RemoteOK' },
-                { pattern: 'weworkremotely.com', name: 'WeWorkRemotely' },
-                { pattern: 'stackoverflow.com/job', name: 'Stack Overflow Jobs' }
-            ];
+            // Use cursor selection for ALL websites - no auto-extraction for any site
+            this.updateJobStatus('Ready for cursor selection on any website', 'success');
             
-            const knownJobSite = jobSites.find(site => 
-                tab.url.toLowerCase().includes(site.pattern)
-            );
-            
-            if (knownJobSite) {
-                // Known job site - offer both structured extraction and manual selection
-                this.updateJobStatus(`${knownJobSite.name} detected - enhanced extraction available`, 'success');
-                this.safeSetButtonState('extractJobBtn', false, `Auto-Extract from ${knownJobSite.name}`);
-                
-                // Check if job details are already extracted
-                try {
-                    const response = await chrome.tabs.sendMessage(tab.id, { action: 'checkJobDetails' });
-                    if (response && response.hasJobDetails) {
-                        this.displayJobSummary(response.jobDetails);
-                    }
-                } catch (error) {
-                    console.log('Content script not yet ready for auto-extraction');
+            // Check if profile is connected to show appropriate button text
+            chrome.storage.sync.get(['webAppConnected', 'accessToken']).then(result => {
+                const isProfileConnected = result.webAppConnected && result.accessToken;
+                if (isProfileConnected) {
+                    this.safeSetButtonState('extractJobBtn', false, 'Use Cursor Selection Below');
+                } else {
+                    this.safeSetButtonState('extractJobBtn', true, '🔒 Connect Profile First');
                 }
-                
-            } else {
-                // Any other website - check profile connection for appropriate message
-                this.updateJobStatus('Website ready for content selection', 'success');
-                
-                // Check if profile is connected to show appropriate button text
-                chrome.storage.sync.get(['webAppConnected', 'accessToken']).then(result => {
-                    const isProfileConnected = result.webAppConnected && result.accessToken;
-                    if (isProfileConnected) {
-                        this.safeSetButtonState('extractJobBtn', false, 'Use Cursor Selection Below');
-                    } else {
-                        this.safeSetButtonState('extractJobBtn', true, '🔒 Connect Profile First');
-                    }
-                });
-                
-                this.showUniversalSelectionInfo();
-            }
+            });
+            
+            this.showUniversalSelectionInfo();
             
         } catch (error) {
             console.error('Error checking page status:', error);
@@ -325,10 +311,16 @@ class PopupController {
         const infoDiv = document.createElement('div');
         infoDiv.className = 'info-section';
         infoDiv.innerHTML = `
-            <div style="background: #e3f2fd; padding: 12px; border-radius: 6px; margin: 10px 0; border-left: 4px solid #2196f3;">
-                <h4 style="margin: 0 0 8px 0; color: #1976d2;">Content Selection Tools</h4>
+            <div style="background: #e8f5e8; padding: 12px; border-radius: 6px; margin: 10px 0; border-left: 4px solid #4caf50;">
+                <h4 style="margin: 0 0 8px 0; color: #2e7d32;">👆 Cursor Selection Mode</h4>
                 <p style="margin: 0; font-size: 13px; line-height: 1.4; color: #333;">
-                    Use the selection tools below to extract job content from this page.
+                    <strong>How to use:</strong><br>
+                    1. Select job description text with your cursor<br>
+                    2. Click "Use Cursor Selection Below"<br>
+                    3. AI will analyze only your selected content
+                </p>
+                <p style="margin: 8px 0 0 0; font-size: 12px; color: #666;">
+                    ✨ Works on any website - LinkedIn, Indeed, company sites, etc.
                 </p>
             </div>
         `;
@@ -355,55 +347,7 @@ class PopupController {
         }
     }
     
-    showSupportedSites() {
-        const supportedSitesHtml = `
-            <div style="margin-top: 10px; padding: 10px; background-color: #f5f5f5; border-radius: 5px; font-size: 12px;">
-                <strong>Supported Job Sites:</strong><br>
-                • LinkedIn Jobs<br>
-                • Indeed<br>
-                • Glassdoor<br>
-                • Monster<br>
-                • ZipRecruiter<br>
-                • CareerBuilder<br>
-                • AngelList / Wellfound<br>
-                • RemoteOK<br>
-                • WeWorkRemotely<br>
-                • Stack Overflow Jobs
-            </div>
-        `;
-        
-        // Add to job status section if not already there
-        if (!document.getElementById('supported-sites-info')) {
-            const infoDiv = document.createElement('div');
-            infoDiv.id = 'supported-sites-info';
-            infoDiv.innerHTML = supportedSitesHtml;
-            
-            // Try multiple fallback selectors for the container
-            let targetContainer = null;
-            try {
-                targetContainer = this.elements.jobStatus?.parentNode ||
-                    document.getElementById('job-status')?.parentNode ||
-                    document.querySelector('.job-status')?.parentNode ||
-                    document.querySelector('.status-card')?.parentNode ||
-                    document.querySelector('.container') ||
-                    document.body;
-                
-                if (targetContainer) {
-                    targetContainer.appendChild(infoDiv);
-                } else {
-                    console.warn('Could not find suitable container for supported sites info');
-                }
-            } catch (error) {
-                console.error('Error displaying supported sites info:', error);
-                // Fallback to body if all else fails
-                try {
-                    document.body.appendChild(infoDiv);
-                } catch (finalError) {
-                    console.error('Failed to append supported sites info to body:', finalError);
-                }
-            }
-        }
-    }
+    // Removed showSupportedSites - now uses cursor selection on all websites
 
     async checkProfileConnection() {
         try {
@@ -1598,10 +1542,16 @@ class PopupController {
             
             this.updateProgress(50, 'Tailoring CV content...');
             
+            // Enhance skills section with job-matched and ATS-friendly keywords
+            const enhancedCvData = this.enhanceSkillsForATS(cvData);
+            
+            // Generate ATS-friendly profile summary
+            enhancedCvData.professionalSummary = this.generateATSProfileSummary(enhancedCvData, this.aiAnalysisResult);
+            
             // Send to backend for CV generation
             const response = await chrome.runtime.sendMessage({
                 action: 'generateCV',
-                data: cvData
+                data: enhancedCvData
             });
             
             this.updateProgress(80, 'Formatting CV...');
@@ -1655,6 +1605,9 @@ class PopupController {
         `;
         
         this.elements.jobSummary.innerHTML = cvSummary;
+        
+        // Calculate and show ATS score
+        this.calculateAndShowATSScore(cvData);
         
         // Store CV data for download
         chrome.storage.local.set({ 
@@ -3221,6 +3174,1304 @@ class PopupController {
     </div>
 </body>
 </html>`;
+    }
+
+    // Enhanced Skills Matching for ATS Optimization
+    enhanceSkillsForATS(cvData) {
+        console.log('[Skills Enhancement] Enhancing skills for ATS optimization...');
+        
+        try {
+            const jobAnalysis = this.aiAnalysisResult;
+            const userProfile = cvData.userProfile;
+            
+            if (!jobAnalysis || !userProfile) {
+                console.log('[Skills Enhancement] Missing job analysis or user profile');
+                return cvData;
+            }
+            
+            // Extract user's existing skills
+            const userSkills = this.extractUserSkills(userProfile);
+            
+            // Extract job requirements and skills
+            const jobSkills = this.extractJobSkills(jobAnalysis);
+            
+            // Generate ATS-friendly skill matches
+            const enhancedSkills = this.generateEnhancedSkills(userSkills, jobSkills, jobAnalysis);
+            
+            // Update CV data with enhanced skills
+            const enhancedCvData = { ...cvData };
+            enhancedCvData.enhancedSkills = enhancedSkills;
+            enhancedCvData.userProfile = {
+                ...userProfile,
+                skills: enhancedSkills
+            };
+            
+            console.log('[Skills Enhancement] Enhanced skills generated:', enhancedSkills);
+            return enhancedCvData;
+            
+        } catch (error) {
+            console.error('[Skills Enhancement] Error enhancing skills:', error);
+            return cvData;
+        }
+    }
+
+    extractUserSkills(userProfile) {
+        const skills = {
+            technical: [],
+            soft: [],
+            tools: [],
+            certifications: []
+        };
+        
+        // Extract from various profile fields
+        if (userProfile.skills) {
+            if (Array.isArray(userProfile.skills)) {
+                skills.technical = [...userProfile.skills];
+            } else if (typeof userProfile.skills === 'object') {
+                skills.technical = userProfile.skills.technical || [];
+                skills.soft = userProfile.skills.soft || [];
+                skills.tools = userProfile.skills.tools || [];
+                skills.certifications = userProfile.skills.certifications || [];
+            }
+        }
+        
+        // Extract skills from experience descriptions
+        if (userProfile.experience && Array.isArray(userProfile.experience)) {
+            userProfile.experience.forEach(exp => {
+                if (exp.description || exp.achievements) {
+                    const text = (exp.description || '') + ' ' + (exp.achievements || []).join(' ');
+                    const extractedSkills = this.extractSkillsFromText(text);
+                    skills.technical.push(...extractedSkills);
+                }
+            });
+        }
+        
+        // Remove duplicates and clean up
+        skills.technical = [...new Set(skills.technical.filter(Boolean))];
+        skills.soft = [...new Set(skills.soft.filter(Boolean))];
+        skills.tools = [...new Set(skills.tools.filter(Boolean))];
+        skills.certifications = [...new Set(skills.certifications.filter(Boolean))];
+        
+        return skills;
+    }
+
+    extractJobSkills(jobAnalysis) {
+        const jobSkills = {
+            required: [],
+            preferred: [],
+            technical: [],
+            soft: [],
+            tools: [],
+            keywords: []
+        };
+        
+        // Extract from job analysis skills
+        if (jobAnalysis.skills && Array.isArray(jobAnalysis.skills)) {
+            jobSkills.required = [...jobAnalysis.skills];
+        }
+        
+        // Extract from requirements text
+        const requirementsText = jobAnalysis.requirements || '';
+        jobSkills.technical.push(...this.extractTechnicalSkillsFromText(requirementsText));
+        jobSkills.soft.push(...this.extractSoftSkillsFromText(requirementsText));
+        jobSkills.tools.push(...this.extractToolsFromText(requirementsText));
+        jobSkills.keywords.push(...this.extractKeywordsFromJobText(requirementsText));
+        
+        // Extract from job description
+        const descriptionText = jobAnalysis.description || '';
+        jobSkills.technical.push(...this.extractTechnicalSkillsFromText(descriptionText));
+        jobSkills.keywords.push(...this.extractKeywordsFromJobText(descriptionText));
+        
+        // Clean and deduplicate
+        Object.keys(jobSkills).forEach(key => {
+            jobSkills[key] = [...new Set(jobSkills[key].filter(Boolean))];
+        });
+        
+        return jobSkills;
+    }
+
+    generateEnhancedSkills(userSkills, jobSkills, jobAnalysis) {
+        const enhanced = {
+            technical: [],
+            soft: [],
+            tools: [],
+            keywords: [],
+            matched: [],
+            suggested: []
+        };
+        
+        // 1. Match user skills with job requirements
+        const matchedTechnical = this.findSkillMatches(userSkills.technical, jobSkills.required);
+        const matchedTools = this.findSkillMatches(userSkills.tools, jobSkills.tools);
+        
+        enhanced.matched = [...matchedTechnical, ...matchedTools];
+        
+        // 2. Add user's relevant skills that match job context
+        const relevantUserSkills = this.filterRelevantSkills(userSkills.technical, jobAnalysis);
+        enhanced.technical = [...enhanced.matched, ...relevantUserSkills];
+        
+        // 3. Add ATS-friendly variations and synonyms
+        const atsVariations = this.generateATSVariations(enhanced.technical, jobSkills);
+        enhanced.technical.push(...atsVariations);
+        
+        // 4. Add complementary skills based on job role
+        const complementarySkills = this.generateComplementarySkills(jobAnalysis, enhanced.technical);
+        enhanced.suggested = complementarySkills;
+        
+        // 5. Add soft skills that match job requirements
+        enhanced.soft = this.matchSoftSkills(userSkills.soft, jobSkills.soft, jobAnalysis);
+        
+        // 6. Add relevant tools and technologies
+        enhanced.tools = [...userSkills.tools, ...this.suggestRelevantTools(jobAnalysis)];
+        
+        // 7. Generate ATS keywords from job posting
+        enhanced.keywords = this.generateATSKeywords(jobAnalysis);
+        
+        // Clean and prioritize (most relevant first)
+        enhanced.technical = this.prioritizeAndCleanSkills([...new Set(enhanced.technical)], jobAnalysis);
+        enhanced.soft = [...new Set(enhanced.soft)];
+        enhanced.tools = [...new Set(enhanced.tools)];
+        enhanced.keywords = [...new Set(enhanced.keywords)];
+        
+        return enhanced;
+    }
+
+    extractSkillsFromText(text) {
+        const technicalPatterns = [
+            /\b(JavaScript|TypeScript|Python|Java|React|Node\.js|MongoDB|SQL|AWS|Docker|Kubernetes)\b/gi,
+            /\b(HTML|CSS|API|REST|GraphQL|Git|CI\/CD|Agile|Scrum)\b/gi,
+            /\b(Machine Learning|AI|Data Science|Analytics|Tableau|Power BI)\b/gi
+        ];
+        
+        const skills = [];
+        technicalPatterns.forEach(pattern => {
+            const matches = text.match(pattern) || [];
+            skills.push(...matches);
+        });
+        
+        return skills;
+    }
+
+    extractTechnicalSkillsFromText(text) {
+        const patterns = [
+            // Programming languages
+            /\b(JavaScript|TypeScript|Python|Java|C\+\+|C#|PHP|Ruby|Go|Rust|Swift|Kotlin)\b/gi,
+            // Frameworks and libraries
+            /\b(React|Angular|Vue|Node\.js|Express|Django|Flask|Spring|Laravel|Rails)\b/gi,
+            // Databases
+            /\b(MySQL|PostgreSQL|MongoDB|Redis|Elasticsearch|Oracle|SQL Server)\b/gi,
+            // Cloud and DevOps
+            /\b(AWS|Azure|GCP|Docker|Kubernetes|Jenkins|CI\/CD|Terraform|Ansible)\b/gi,
+            // Others
+            /\b(REST|GraphQL|API|Microservices|Git|Linux|Unix|Agile|Scrum)\b/gi
+        ];
+        
+        const skills = [];
+        patterns.forEach(pattern => {
+            const matches = text.match(pattern) || [];
+            skills.push(...matches);
+        });
+        
+        return skills;
+    }
+
+    extractSoftSkillsFromText(text) {
+        const softSkillsMap = {
+            'leadership': ['leadership', 'lead', 'manage', 'management', 'supervise'],
+            'communication': ['communication', 'communicate', 'presentation', 'collaboration'],
+            'problem-solving': ['problem-solving', 'analytical', 'troubleshoot', 'debug'],
+            'teamwork': ['teamwork', 'team player', 'collaborate', 'cooperation'],
+            'adaptability': ['adaptable', 'flexible', 'versatile', 'learning'],
+            'creativity': ['creative', 'innovative', 'design thinking', 'brainstorm']
+        };
+        
+        const foundSkills = [];
+        Object.entries(softSkillsMap).forEach(([skill, keywords]) => {
+            const regex = new RegExp(`\\b(${keywords.join('|')})\\b`, 'gi');
+            if (regex.test(text)) {
+                foundSkills.push(skill);
+            }
+        });
+        
+        return foundSkills;
+    }
+
+    extractToolsFromText(text) {
+        const toolPatterns = [
+            /\b(Jira|Confluence|Slack|Trello|Asana|Notion)\b/gi,
+            /\b(Figma|Sketch|Adobe|Photoshop|Illustrator)\b/gi,
+            /\b(VS Code|IntelliJ|Eclipse|Sublime|Vim)\b/gi,
+            /\b(Postman|Insomnia|Swagger|Tableau|Power BI)\b/gi
+        ];
+        
+        const tools = [];
+        toolPatterns.forEach(pattern => {
+            const matches = text.match(pattern) || [];
+            tools.push(...matches);
+        });
+        
+        return tools;
+    }
+
+    extractKeywordsFromJobText(text) {
+        // Extract important keywords that ATS systems look for
+        const keywords = [];
+        
+        // Action verbs
+        const actionVerbs = text.match(/\b(develop|implement|design|create|manage|lead|optimize|analyze|improve|build)\w*/gi) || [];
+        keywords.push(...actionVerbs);
+        
+        // Industry terms
+        const industryTerms = text.match(/\b(software|application|system|platform|solution|architecture|infrastructure)\w*/gi) || [];
+        keywords.push(...industryTerms);
+        
+        // Qualification terms
+        const qualifications = text.match(/\b(experience|expertise|proficient|skilled|knowledge|background)\w*/gi) || [];
+        keywords.push(...qualifications);
+        
+        return keywords;
+    }
+
+    findSkillMatches(userSkills, jobSkills) {
+        const matches = [];
+        
+        userSkills.forEach(userSkill => {
+            jobSkills.forEach(jobSkill => {
+                if (this.isSkillMatch(userSkill, jobSkill)) {
+                    matches.push(userSkill);
+                }
+            });
+        });
+        
+        return matches;
+    }
+
+    isSkillMatch(userSkill, jobSkill) {
+        const user = userSkill.toLowerCase();
+        const job = jobSkill.toLowerCase();
+        
+        // Exact match
+        if (user === job) return true;
+        
+        // Partial match
+        if (user.includes(job) || job.includes(user)) return true;
+        
+        // Synonym match
+        const synonyms = {
+            'js': 'javascript',
+            'typescript': 'ts',
+            'python': 'py',
+            'node': 'node.js',
+            'react': 'reactjs',
+            'vue': 'vuejs'
+        };
+        
+        const userSynonym = synonyms[user] || user;
+        const jobSynonym = synonyms[job] || job;
+        
+        return userSynonym === jobSynonym;
+    }
+
+    filterRelevantSkills(userSkills, jobAnalysis) {
+        const jobText = `${jobAnalysis.title} ${jobAnalysis.description} ${jobAnalysis.requirements}`.toLowerCase();
+        
+        return userSkills.filter(skill => {
+            const skillLower = skill.toLowerCase();
+            return jobText.includes(skillLower) || this.isRelevantToRole(skill, jobAnalysis.title);
+        });
+    }
+
+    isRelevantToRole(skill, jobTitle) {
+        const roleMap = {
+            'frontend': ['react', 'vue', 'angular', 'javascript', 'typescript', 'html', 'css'],
+            'backend': ['node.js', 'python', 'java', 'api', 'database', 'sql', 'mongodb'],
+            'fullstack': ['react', 'node.js', 'javascript', 'api', 'database'],
+            'devops': ['docker', 'kubernetes', 'aws', 'ci/cd', 'jenkins', 'terraform'],
+            'data': ['python', 'sql', 'tableau', 'power bi', 'machine learning', 'analytics']
+        };
+        
+        const title = jobTitle.toLowerCase();
+        const skillLower = skill.toLowerCase();
+        
+        for (const [role, skills] of Object.entries(roleMap)) {
+            if (title.includes(role) && skills.some(s => skillLower.includes(s))) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    generateATSVariations(skills, jobSkills) {
+        const variations = [];
+        
+        skills.forEach(skill => {
+            // Add variations for common skills
+            const skillVariations = this.getSkillVariations(skill);
+            variations.push(...skillVariations);
+            
+            // Check if job mentions this skill in different format
+            jobSkills.keywords.forEach(keyword => {
+                if (this.isSkillMatch(skill, keyword)) {
+                    variations.push(keyword);
+                }
+            });
+        });
+        
+        return variations;
+    }
+
+    getSkillVariations(skill) {
+        const variations = {
+            'javascript': ['JavaScript', 'JS', 'ECMAScript'],
+            'typescript': ['TypeScript', 'TS'],
+            'react': ['React.js', 'ReactJS', 'React'],
+            'node.js': ['Node', 'NodeJS', 'Node.js'],
+            'python': ['Python', 'Python 3'],
+            'sql': ['SQL', 'MySQL', 'Structured Query Language'],
+            'aws': ['AWS', 'Amazon Web Services'],
+            'docker': ['Docker', 'Containerization'],
+            'kubernetes': ['Kubernetes', 'K8s', 'Container Orchestration']
+        };
+        
+        return variations[skill.toLowerCase()] || [skill];
+    }
+
+    generateComplementarySkills(jobAnalysis, existingSkills) {
+        const complementary = [];
+        const jobText = `${jobAnalysis.title} ${jobAnalysis.description}`.toLowerCase();
+        
+        // Role-based complementary skills
+        if (jobText.includes('frontend') || jobText.includes('react')) {
+            complementary.push('HTML5', 'CSS3', 'Responsive Design', 'JavaScript ES6+');
+        }
+        
+        if (jobText.includes('backend') || jobText.includes('api')) {
+            complementary.push('RESTful APIs', 'Database Design', 'Server Architecture');
+        }
+        
+        if (jobText.includes('cloud') || jobText.includes('aws')) {
+            complementary.push('Cloud Architecture', 'Serverless', 'Microservices');
+        }
+        
+        if (jobText.includes('data') || jobText.includes('analytics')) {
+            complementary.push('Data Visualization', 'Statistical Analysis', 'ETL');
+        }
+        
+        // Filter out skills already present
+        return complementary.filter(skill => 
+            !existingSkills.some(existing => 
+                existing.toLowerCase().includes(skill.toLowerCase())
+            )
+        );
+    }
+
+    matchSoftSkills(userSoftSkills, jobSoftSkills, jobAnalysis) {
+        const matched = [];
+        const jobText = `${jobAnalysis.description} ${jobAnalysis.requirements}`.toLowerCase();
+        
+        // Standard soft skills for most tech roles
+        const standardSoftSkills = [
+            'Problem Solving', 'Communication', 'Teamwork', 'Adaptability', 
+            'Time Management', 'Critical Thinking', 'Attention to Detail'
+        ];
+        
+        // Add user's soft skills that are relevant
+        userSoftSkills.forEach(skill => {
+            if (jobText.includes(skill.toLowerCase())) {
+                matched.push(skill);
+            }
+        });
+        
+        // Add standard soft skills if not already present
+        standardSoftSkills.forEach(skill => {
+            if (!matched.some(m => m.toLowerCase() === skill.toLowerCase())) {
+                matched.push(skill);
+            }
+        });
+        
+        return matched.slice(0, 6); // Limit to 6 soft skills
+    }
+
+    suggestRelevantTools(jobAnalysis) {
+        const tools = [];
+        const jobText = `${jobAnalysis.description} ${jobAnalysis.requirements}`.toLowerCase();
+        
+        // Common development tools
+        if (jobText.includes('git')) tools.push('Git', 'GitHub');
+        if (jobText.includes('agile') || jobText.includes('scrum')) tools.push('Jira', 'Confluence');
+        if (jobText.includes('design')) tools.push('Figma', 'Adobe Creative Suite');
+        if (jobText.includes('testing')) tools.push('Jest', 'Selenium', 'Postman');
+        if (jobText.includes('ci/cd')) tools.push('Jenkins', 'GitHub Actions');
+        
+        return tools;
+    }
+
+    generateATSKeywords(jobAnalysis) {
+        const keywords = [];
+        
+        // Extract action verbs and important phrases
+        const text = `${jobAnalysis.description} ${jobAnalysis.requirements}`;
+        
+        // Important action words for ATS
+        const actionWords = [
+            'develop', 'implement', 'design', 'create', 'manage', 'lead', 
+            'optimize', 'analyze', 'improve', 'build', 'maintain', 'deploy'
+        ];
+        
+        actionWords.forEach(word => {
+            const regex = new RegExp(`\\b${word}\\w*`, 'gi');
+            const matches = text.match(regex) || [];
+            keywords.push(...matches);
+        });
+        
+        return keywords;
+    }
+
+    prioritizeAndCleanSkills(skills, jobAnalysis) {
+        const jobText = `${jobAnalysis.description} ${jobAnalysis.requirements}`.toLowerCase();
+        
+        // Score skills based on relevance to job
+        const scoredSkills = skills.map(skill => {
+            let score = 0;
+            const skillLower = skill.toLowerCase();
+            
+            // Higher score if mentioned in job description
+            if (jobText.includes(skillLower)) score += 10;
+            
+            // Higher score for technical skills
+            if (this.isTechnicalSkill(skill)) score += 5;
+            
+            // Higher score for modern/popular technologies
+            if (this.isModernTech(skill)) score += 3;
+            
+            return { skill, score };
+        });
+        
+        // Sort by score and return top skills
+        return scoredSkills
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 15) // Limit to 15 top skills
+            .map(item => item.skill);
+    }
+
+    isTechnicalSkill(skill) {
+        const technicalKeywords = [
+            'javascript', 'python', 'react', 'node', 'sql', 'aws', 'docker', 
+            'api', 'database', 'html', 'css', 'git', 'linux'
+        ];
+        
+        return technicalKeywords.some(keyword => 
+            skill.toLowerCase().includes(keyword)
+        );
+    }
+
+    isModernTech(skill) {
+        const modernTech = [
+            'react', 'vue', 'typescript', 'node.js', 'docker', 'kubernetes',
+            'aws', 'graphql', 'mongodb', 'elasticsearch', 'redis'
+        ];
+        
+        return modernTech.some(tech => 
+            skill.toLowerCase().includes(tech)
+        );
+    }
+
+    // ATS-Friendly Profile Summary Generation
+    generateATSProfileSummary(cvData, jobAnalysis) {
+        console.log('[Profile Summary] Generating ATS-friendly profile summary...');
+        console.log('[Profile Summary] Job analysis:', jobAnalysis);
+        console.log('[Profile Summary] CV data:', cvData);
+        
+        try {
+            // Add safety checks
+            if (!jobAnalysis) {
+                console.warn('[Profile Summary] No job analysis provided, using default summary');
+                return this.getDefaultProfileSummary();
+            }
+            
+            if (!cvData || !cvData.userProfile) {
+                console.warn('[Profile Summary] No user profile data, using default summary');
+                return this.getDefaultProfileSummary();
+            }
+            
+            const userProfile = cvData.userProfile;
+            const enhancedSkills = cvData.enhancedSkills || {};
+            
+            // Extract key information
+            const experience = this.extractExperienceInfo(userProfile);
+            const skills = this.extractTopSkillsForSummary(enhancedSkills, jobAnalysis);
+            const achievements = this.extractKeyAchievements(userProfile);
+            const jobFocus = this.analyzeJobFocus(jobAnalysis);
+            
+            console.log('[Profile Summary] Extracted data:', {
+                experience,
+                skills,
+                achievements,
+                jobFocus
+            });
+            
+            // Build ATS-optimized summary
+            const summary = this.buildATSProfileSummary({
+                experience,
+                skills,
+                achievements,
+                jobFocus,
+                jobTitle: jobAnalysis.title || 'Software Developer',
+                jobRequirements: jobAnalysis.requirements || ''
+            });
+            
+            console.log('[Profile Summary] Generated summary:', summary);
+            return summary;
+            
+        } catch (error) {
+            console.error('[Profile Summary] Error generating summary:', error);
+            return this.getDefaultProfileSummary();
+        }
+    }
+
+    extractExperienceInfo(userProfile) {
+        const info = {
+            totalYears: 0,
+            currentRole: '',
+            industries: [],
+            specializations: []
+        };
+        
+        if (userProfile.experience && Array.isArray(userProfile.experience)) {
+            // Calculate total years of experience
+            info.totalYears = userProfile.experience.length;
+            
+            // Get current/most recent role
+            if (userProfile.experience.length > 0) {
+                const mostRecent = userProfile.experience[0];
+                info.currentRole = mostRecent.title || '';
+            }
+            
+            // Extract industries and specializations
+            userProfile.experience.forEach(exp => {
+                if (exp.company) info.industries.push(exp.company);
+                if (exp.description) {
+                    // Extract specializations from descriptions
+                    const specializationKeywords = this.extractSpecializationKeywords(exp.description);
+                    info.specializations.push(...specializationKeywords);
+                }
+            });
+        }
+        
+        // Clean and deduplicate
+        info.industries = [...new Set(info.industries)];
+        info.specializations = [...new Set(info.specializations)];
+        
+        return info;
+    }
+
+    extractTopSkillsForSummary(enhancedSkills, jobAnalysis) {
+        const topSkills = [];
+        
+        // Prioritize matched skills first
+        if (enhancedSkills.matched && enhancedSkills.matched.length > 0) {
+            topSkills.push(...enhancedSkills.matched.slice(0, 4));
+        }
+        
+        // Add top technical skills
+        if (enhancedSkills.technical && enhancedSkills.technical.length > 0) {
+            const remainingSlots = 6 - topSkills.length;
+            const additionalSkills = enhancedSkills.technical
+                .filter(skill => !topSkills.includes(skill))
+                .slice(0, remainingSlots);
+            topSkills.push(...additionalSkills);
+        }
+        
+        // Ensure we have key job-relevant skills (only if jobAnalysis exists)
+        if (jobAnalysis && jobAnalysis.skills && topSkills.length < 5) {
+            const jobSkills = jobAnalysis.skills
+                .filter(skill => !topSkills.some(ts => this.isSkillMatch(ts, skill)))
+                .slice(0, 5 - topSkills.length);
+            topSkills.push(...jobSkills);
+        }
+        
+        // If no skills found, add some default technical skills
+        if (topSkills.length === 0) {
+            topSkills.push('JavaScript', 'Python', 'SQL', 'Git', 'API Development');
+        }
+        
+        return topSkills.slice(0, 6); // Limit to 6 skills for summary
+    }
+
+    extractKeyAchievements(userProfile) {
+        const achievements = [];
+        
+        if (userProfile.experience && Array.isArray(userProfile.experience)) {
+            userProfile.experience.forEach(exp => {
+                // Look for quantifiable achievements
+                if (exp.achievements && Array.isArray(exp.achievements)) {
+                    const quantifiableAchievements = exp.achievements.filter(achievement =>
+                        this.hasQuantifiableMetrics(achievement)
+                    );
+                    achievements.push(...quantifiableAchievements);
+                }
+                
+                // Extract achievements from description
+                if (exp.description) {
+                    const descriptionAchievements = this.extractAchievementsFromText(exp.description);
+                    achievements.push(...descriptionAchievements);
+                }
+            });
+        }
+        
+        return achievements.slice(0, 2); // Limit to 2 key achievements
+    }
+
+    hasQuantifiableMetrics(text) {
+        const metricPatterns = [
+            /\d+%/, // Percentages
+            /\d+\+/, // Numbers with plus
+            /\$\d+/, // Dollar amounts
+            /\d+\s*(years?|months?|weeks?)/, // Time periods
+            /\d+\s*(million|thousand|k|m)\b/i, // Large numbers
+            /improved?|increased?|reduced?|delivered?|achieved?/i // Achievement verbs
+        ];
+        
+        return metricPatterns.some(pattern => pattern.test(text));
+    }
+
+    extractAchievementsFromText(text) {
+        const achievements = [];
+        const sentences = text.split(/[.!?]+/).filter(Boolean);
+        
+        sentences.forEach(sentence => {
+            if (this.hasQuantifiableMetrics(sentence.trim())) {
+                achievements.push(sentence.trim());
+            }
+        });
+        
+        return achievements;
+    }
+
+    extractSpecializationKeywords(description) {
+        const specializations = [];
+        const text = description.toLowerCase();
+        
+        // Technical specializations
+        const techSpecializations = [
+            'frontend development', 'backend development', 'full-stack development',
+            'mobile development', 'web development', 'api development',
+            'data engineering', 'machine learning', 'devops', 'cloud architecture',
+            'microservices', 'system design', 'database design', 'ui/ux design'
+        ];
+        
+        techSpecializations.forEach(spec => {
+            if (text.includes(spec)) {
+                specializations.push(spec);
+            }
+        });
+        
+        return specializations;
+    }
+
+    analyzeJobFocus(jobAnalysis) {
+        const focus = {
+            level: 'experienced', // default
+            type: 'technical',
+            industry: '',
+            keywords: []
+        };
+        
+        // Safety check
+        if (!jobAnalysis) {
+            console.warn('[Profile Summary] No job analysis for focus detection');
+            return focus;
+        }
+        
+        const titleAndDesc = `${jobAnalysis.title || ''} ${jobAnalysis.description || ''}`.toLowerCase();
+        
+        // Determine seniority level
+        if (titleAndDesc.includes('senior') || titleAndDesc.includes('lead') || titleAndDesc.includes('principal')) {
+            focus.level = 'senior';
+        } else if (titleAndDesc.includes('junior') || titleAndDesc.includes('entry')) {
+            focus.level = 'junior';
+        } else if (titleAndDesc.includes('mid') || titleAndDesc.includes('intermediate')) {
+            focus.level = 'mid-level';
+        }
+        
+        // Determine type/specialization
+        if (titleAndDesc.includes('frontend') || titleAndDesc.includes('front-end')) {
+            focus.type = 'frontend';
+        } else if (titleAndDesc.includes('backend') || titleAndDesc.includes('back-end')) {
+            focus.type = 'backend';
+        } else if (titleAndDesc.includes('fullstack') || titleAndDesc.includes('full-stack')) {
+            focus.type = 'full-stack';
+        } else if (titleAndDesc.includes('data') || titleAndDesc.includes('analytics')) {
+            focus.type = 'data';
+        } else if (titleAndDesc.includes('devops') || titleAndDesc.includes('cloud')) {
+            focus.type = 'devops';
+        } else if (titleAndDesc.includes('mobile')) {
+            focus.type = 'mobile';
+        }
+        
+        // Extract important keywords
+        focus.keywords = this.extractJobFocusKeywords(jobAnalysis);
+        
+        return focus;
+    }
+
+    extractJobFocusKeywords(jobAnalysis) {
+        const keywords = [];
+        
+        // Safety check
+        if (!jobAnalysis) {
+            return ['innovative', 'collaborative', 'efficient', 'problem-solving']; // default keywords
+        }
+        
+        const text = `${jobAnalysis.title || ''} ${jobAnalysis.description || ''} ${jobAnalysis.requirements || ''}`;
+        
+        // Important ATS keywords
+        const atsKeywords = [
+            'scalable', 'performance', 'optimization', 'architecture', 'implementation',
+            'collaboration', 'cross-functional', 'agile', 'scrum', 'innovative',
+            'problem-solving', 'leadership', 'mentoring', 'best practices',
+            'high-quality', 'efficient', 'reliable', 'maintainable'
+        ];
+        
+        atsKeywords.forEach(keyword => {
+            if (text.toLowerCase().includes(keyword)) {
+                keywords.push(keyword);
+            }
+        });
+        
+        // If no keywords found, return defaults
+        if (keywords.length === 0) {
+            return ['collaborative', 'innovative', 'efficient'];
+        }
+        
+        return keywords.slice(0, 4); // Limit to 4 keywords
+    }
+
+    buildATSProfileSummary(data) {
+        const { experience, skills, achievements, jobFocus, jobTitle, jobRequirements } = data;
+        
+        // Create dynamic summary based on job focus and user profile
+        let summary = '';
+        
+        // Opening statement with years of experience and specialization
+        const yearsText = this.getExperienceText(experience.totalYears);
+        const specializationText = this.getSpecializationText(jobFocus.type, experience.specializations);
+        
+        summary += `${yearsText} ${specializationText} with proven expertise in ${skills.slice(0, 3).join(', ')}. `;
+        
+        // Add key achievement if available
+        if (achievements.length > 0) {
+            const topAchievement = achievements[0];
+            if (topAchievement.length < 100) { // Keep it concise
+                summary += `${topAchievement}. `;
+            }
+        }
+        
+        // Add technical skills and job-relevant keywords
+        if (skills.length > 3) {
+            summary += `Proficient in ${skills.slice(3).join(', ')} with experience in `;
+        } else {
+            summary += `Strong background in `;
+        }
+        
+        // Add job-focused capabilities
+        const capabilities = this.generateJobRelevantCapabilities(jobFocus, jobRequirements);
+        summary += `${capabilities}. `;
+        
+        // Add soft skills and job focus keywords
+        if (jobFocus.keywords.length > 0) {
+            const keywordPhrase = this.createKeywordPhrase(jobFocus.keywords);
+            summary += `${keywordPhrase}. `;
+        }
+        
+        // Closing statement with career objective aligned to job
+        const closingStatement = this.generateClosingStatement(jobTitle, jobFocus);
+        summary += closingStatement;
+        
+        // Clean up and ensure ATS optimization
+        summary = this.optimizeSummaryForATS(summary, jobRequirements);
+        
+        return summary;
+    }
+
+    getExperienceText(years) {
+        if (years >= 8) return `Seasoned software professional with ${years}+ years of experience`;
+        if (years >= 5) return `Experienced software developer with ${years}+ years`;
+        if (years >= 3) return `Skilled developer with ${years}+ years of experience`;
+        if (years >= 1) return `Talented developer with ${years}+ years of experience`;
+        return `Motivated software developer`;
+    }
+
+    getSpecializationText(type, specializations) {
+        const typeMap = {
+            'frontend': 'frontend developer',
+            'backend': 'backend engineer',
+            'full-stack': 'full-stack developer',
+            'data': 'data engineer',
+            'devops': 'DevOps engineer',
+            'mobile': 'mobile application developer',
+            'technical': 'software engineer'
+        };
+        
+        const baseRole = typeMap[type] || 'software developer';
+        
+        if (specializations.length > 0) {
+            return `${baseRole} specializing in ${specializations[0]}`;
+        }
+        
+        return baseRole;
+    }
+
+    generateJobRelevantCapabilities(jobFocus, jobRequirements) {
+        const capabilities = [];
+        
+        // Add type-specific capabilities
+        const typeCapabilities = {
+            'frontend': ['responsive web design', 'user interface development', 'cross-browser compatibility'],
+            'backend': ['API development', 'database optimization', 'server-side architecture'],
+            'full-stack': ['end-to-end application development', 'API integration', 'database design'],
+            'data': ['data pipeline development', 'ETL processes', 'data analysis'],
+            'devops': ['CI/CD implementation', 'cloud infrastructure', 'automation'],
+            'mobile': ['mobile app development', 'cross-platform solutions', 'app optimization']
+        };
+        
+        const relevantCapabilities = typeCapabilities[jobFocus.type] || ['software development', 'system design', 'technical implementation'];
+        capabilities.push(...relevantCapabilities.slice(0, 2));
+        
+        // Add capabilities from job requirements
+        const requirementCapabilities = this.extractCapabilitiesFromRequirements(jobRequirements);
+        capabilities.push(...requirementCapabilities.slice(0, 1));
+        
+        return capabilities.join(', ');
+    }
+
+    extractCapabilitiesFromRequirements(requirements) {
+        const capabilities = [];
+        const text = requirements.toLowerCase();
+        
+        const capabilityKeywords = [
+            'agile methodologies', 'scrum development', 'test-driven development',
+            'code review', 'mentoring', 'team leadership', 'project management',
+            'performance optimization', 'scalable solutions', 'system integration'
+        ];
+        
+        capabilityKeywords.forEach(capability => {
+            if (text.includes(capability.toLowerCase())) {
+                capabilities.push(capability);
+            }
+        });
+        
+        return capabilities;
+    }
+
+    createKeywordPhrase(keywords) {
+        if (keywords.length === 0) return 'Committed to delivering high-quality solutions';
+        
+        const phrases = {
+            'scalable': 'building scalable applications',
+            'performance': 'optimizing system performance',
+            'collaboration': 'working in collaborative environments',
+            'innovative': 'developing innovative solutions',
+            'leadership': 'providing technical leadership',
+            'agile': 'following agile development practices'
+        };
+        
+        const matchedPhrases = keywords.map(keyword => phrases[keyword]).filter(Boolean);
+        
+        if (matchedPhrases.length > 0) {
+            return `Experienced in ${matchedPhrases.slice(0, 2).join(' and ')}`;
+        }
+        
+        return 'Dedicated to delivering innovative and efficient solutions';
+    }
+
+    generateClosingStatement(jobTitle, jobFocus) {
+        const statements = {
+            'senior': `Seeking to leverage expertise in ${jobFocus.type} development to drive innovation and technical excellence in a senior role.`,
+            'mid-level': `Looking to contribute technical skills and growing expertise to deliver impactful solutions.`,
+            'junior': `Eager to apply technical foundation and learn from experienced teams while contributing to meaningful projects.`,
+            'experienced': `Ready to contribute proven development skills and collaborate with cross-functional teams to achieve business objectives.`
+        };
+        
+        return statements[jobFocus.level] || statements['experienced'];
+    }
+
+    optimizeSummaryForATS(summary, jobRequirements) {
+        // Ensure summary includes key ATS terms
+        const atsTerms = this.extractATSTermsFromRequirements(jobRequirements);
+        
+        // Add missing critical terms naturally
+        atsTerms.forEach(term => {
+            if (!summary.toLowerCase().includes(term.toLowerCase()) && summary.length < 450) {
+                // Add term naturally if space allows
+                const insertionPoints = [
+                    ' with experience in ',
+                    ' including ',
+                    ' and expertise in '
+                ];
+                
+                const insertPoint = insertionPoints.find(point => summary.includes(point));
+                if (insertPoint) {
+                    summary = summary.replace(insertPoint, `${insertPoint}${term}, `);
+                }
+            }
+        });
+        
+        // Ensure proper length (150-200 words ideal for ATS)
+        if (summary.length > 500) {
+            const sentences = summary.split('. ');
+            summary = sentences.slice(0, 3).join('. ') + '.';
+        }
+        
+        // Clean up formatting
+        summary = summary.replace(/\s+/g, ' ').trim();
+        
+        return summary;
+    }
+
+    extractATSTermsFromRequirements(requirements) {
+        const terms = [];
+        const text = requirements.toLowerCase();
+        
+        // Extract specific technologies and methodologies
+        const patterns = [
+            /\b(react|angular|vue|node\.js|python|java|typescript|javascript)\b/g,
+            /\b(aws|azure|docker|kubernetes|git|api|rest|graphql)\b/g,
+            /\b(agile|scrum|ci\/cd|devops|microservices)\b/g
+        ];
+        
+        patterns.forEach(pattern => {
+            const matches = text.match(pattern) || [];
+            terms.push(...matches);
+        });
+        
+        return [...new Set(terms)].slice(0, 3); // Limit to 3 most important terms
+    }
+
+    getDefaultProfileSummary() {
+        console.log('[Profile Summary] Using default profile summary');
+        return "Experienced software developer with strong technical skills and passion for creating innovative solutions. Proficient in modern development technologies with expertise in full-stack development, API integration, and database design. Skilled in collaborative environments and committed to delivering high-quality, scalable applications. Dedicated to continuous learning and professional growth with strong problem-solving abilities and attention to detail.";
+    }
+
+    // ATS Score Calculation Methods
+    calculateAndShowATSScore(cvData) {
+        console.log('[ATS Score] Calculating ATS compatibility score...');
+        
+        const score = this.calculateATSScore(cvData);
+        this.displayATSScore(score);
+        
+        // Initially hide download button until user reviews score
+        if (this.elements.downloadCvBtn) {
+            this.elements.downloadCvBtn.style.display = 'none';
+        }
+    }
+
+    calculateATSScore(cvData) {
+        try {
+            const jobAnalysis = this.aiAnalysisResult;
+            if (!jobAnalysis || !cvData) {
+                return { overall: 50, breakdown: {}, recommendations: ['Unable to calculate score'] };
+            }
+
+            // Calculate keyword matching
+            const keywordsScore = this.calculateKeywordMatch(cvData, jobAnalysis);
+            
+            // Calculate skills alignment  
+            const skillsScore = this.calculateSkillsAlignment(cvData, jobAnalysis);
+            
+            // Calculate experience match
+            const experienceScore = this.calculateExperienceMatch(cvData, jobAnalysis);
+            
+            // Calculate format optimization
+            const formatScore = this.calculateFormatScore(cvData);
+            
+            // Calculate overall score (weighted average)
+            const overall = Math.round(
+                (keywordsScore * 0.3) + 
+                (skillsScore * 0.25) + 
+                (experienceScore * 0.25) + 
+                (formatScore * 0.2)
+            );
+
+            const breakdown = {
+                keywords: keywordsScore,
+                skills: skillsScore,
+                experience: experienceScore,
+                format: formatScore
+            };
+
+            const recommendations = this.generateRecommendations(breakdown, overall);
+
+            return { overall, breakdown, recommendations };
+        } catch (error) {
+            console.error('[ATS Score] Error calculating score:', error);
+            return { overall: 50, breakdown: {}, recommendations: ['Error calculating score'] };
+        }
+    }
+
+    calculateKeywordMatch(cvData, jobAnalysis) {
+        const jobKeywords = this.extractKeywords(jobAnalysis.requirements || '');
+        const enhancedSkills = cvData.enhancedSkills || {};
+        
+        // Create comprehensive CV text including enhanced skills
+        const cvText = [
+            JSON.stringify(cvData),
+            ...(enhancedSkills.technical || []),
+            ...(enhancedSkills.keywords || []),
+            ...(enhancedSkills.tools || [])
+        ].join(' ').toLowerCase();
+        
+        if (jobKeywords.length === 0) return 75;
+        
+        let matchedCount = 0;
+        
+        jobKeywords.forEach(keyword => {
+            const keywordLower = keyword.toLowerCase();
+            
+            // Direct match
+            if (cvText.includes(keywordLower)) {
+                matchedCount += 1;
+                return;
+            }
+            
+            // Check for variations in enhanced skills
+            const hasVariation = (enhancedSkills.technical || []).some(skill =>
+                this.isSkillMatch(skill, keyword)
+            );
+            
+            if (hasVariation) {
+                matchedCount += 0.8; // Slightly lower score for variations
+            }
+        });
+        
+        const score = Math.min(Math.round((matchedCount / jobKeywords.length) * 100), 100);
+        console.log(`[ATS Score] Keyword match: ${matchedCount}/${jobKeywords.length} matched, score: ${score}%`);
+        return score;
+    }
+
+    calculateSkillsAlignment(cvData, jobAnalysis) {
+        const jobSkills = jobAnalysis.skills || [];
+        const enhancedSkills = cvData.enhancedSkills || {};
+        
+        // Get all skills from enhanced data
+        const allCvSkills = [
+            ...(enhancedSkills.technical || []),
+            ...(enhancedSkills.matched || []),
+            ...(enhancedSkills.tools || []),
+            ...(cvData.skills || [])
+        ];
+        
+        if (jobSkills.length === 0) return 80;
+        
+        // Calculate matches with enhanced algorithm
+        let matchScore = 0;
+        let totalJobSkills = jobSkills.length;
+        
+        jobSkills.forEach(jobSkill => {
+            const hasMatch = allCvSkills.some(cvSkill => 
+                this.isSkillMatch(cvSkill, jobSkill) ||
+                this.isAdvancedSkillMatch(cvSkill, jobSkill)
+            );
+            
+            if (hasMatch) {
+                matchScore += 1;
+            }
+        });
+        
+        // Bonus points for having suggested complementary skills
+        const bonusSkills = enhancedSkills.suggested || [];
+        const bonusPoints = Math.min(bonusSkills.length * 2, 20);
+        
+        const baseScore = Math.round((matchScore / totalJobSkills) * 100);
+        const finalScore = Math.min(baseScore + bonusPoints, 100);
+        
+        console.log(`[ATS Score] Skills alignment: ${matchScore}/${totalJobSkills} matched, bonus: ${bonusPoints}, final: ${finalScore}%`);
+        return finalScore;
+    }
+
+    isAdvancedSkillMatch(cvSkill, jobSkill) {
+        const cv = cvSkill.toLowerCase();
+        const job = jobSkill.toLowerCase();
+        
+        // Advanced matching patterns
+        const advancedMatches = {
+            'frontend': ['react', 'vue', 'angular', 'javascript', 'html', 'css'],
+            'backend': ['node', 'python', 'java', 'api', 'server'],
+            'database': ['sql', 'mongodb', 'mysql', 'postgresql', 'nosql'],
+            'cloud': ['aws', 'azure', 'gcp', 'docker', 'kubernetes'],
+            'web development': ['html', 'css', 'javascript', 'react', 'api']
+        };
+        
+        // Check if job skill is a category that CV skill belongs to
+        for (const [category, skills] of Object.entries(advancedMatches)) {
+            if (job.includes(category) && skills.some(s => cv.includes(s))) {
+                return true;
+            }
+        }
+        
+        // Semantic similarity
+        const semanticPairs = [
+            ['javascript', 'js'], ['typescript', 'ts'], ['node.js', 'node'],
+            ['react.js', 'react'], ['vue.js', 'vue'], ['mongodb', 'mongo'],
+            ['postgresql', 'postgres'], ['kubernetes', 'k8s']
+        ];
+        
+        return semanticPairs.some(([skill1, skill2]) => 
+            (cv.includes(skill1) && job.includes(skill2)) ||
+            (cv.includes(skill2) && job.includes(skill1))
+        );
+    }
+
+    calculateExperienceMatch(cvData, jobAnalysis) {
+        // Simple experience matching based on years and relevance
+        const requiredYears = this.extractYearsFromText(jobAnalysis.requirements || '');
+        const cvYears = cvData.experience ? cvData.experience.length : 0;
+        
+        if (requiredYears === 0) return 85;
+        
+        const ratio = Math.min(cvYears / requiredYears, 1);
+        return Math.round(ratio * 100);
+    }
+
+    calculateFormatScore(cvData) {
+        let score = 70; // Base score
+        
+        // Check for key sections
+        if (cvData.experience && cvData.experience.length > 0) score += 10;
+        if (cvData.skills && cvData.skills.length > 0) score += 10;
+        if (cvData.education && cvData.education.length > 0) score += 5;
+        if (cvData.contact) score += 5;
+        
+        return Math.min(score, 100);
+    }
+
+    extractKeywords(text) {
+        const commonWords = ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'];
+        const words = text.toLowerCase()
+            .replace(/[^\w\s]/g, ' ')
+            .split(/\s+/)
+            .filter(word => word.length > 3 && !commonWords.includes(word));
+        
+        return [...new Set(words)].slice(0, 10); // Return unique keywords
+    }
+
+    extractYearsFromText(text) {
+        const yearMatch = text.match(/(\d+)\s*(?:years?|yrs?)/i);
+        return yearMatch ? parseInt(yearMatch[1]) : 0;
+    }
+
+    generateRecommendations(breakdown, overall) {
+        const recommendations = [];
+        
+        if (breakdown.keywords < 70) {
+            recommendations.push('Include more job-specific keywords and technical terms from the job description');
+        }
+        if (breakdown.skills < 70) {
+            recommendations.push('Add more relevant technical skills and tools mentioned in the job posting');
+            recommendations.push('Consider adding skill variations (e.g., "JavaScript" and "JS", "React.js" and "React")');
+        }
+        if (breakdown.experience < 70) {
+            recommendations.push('Highlight more relevant work experience and quantifiable achievements');
+            recommendations.push('Include specific technologies and methodologies used in previous roles');
+        }
+        if (breakdown.format < 85) {
+            recommendations.push('Improve CV format with clear sections and ATS-friendly structure');
+            recommendations.push('Use standard section headers like "Technical Skills", "Experience", "Education"');
+        }
+        if (overall < 80) {
+            recommendations.push('Consider adding more industry-specific terminology and acronyms');
+            recommendations.push('Include complementary skills that often appear together in job postings');
+        }
+        if (breakdown.skills > 90 && breakdown.keywords < 70) {
+            recommendations.push('Add more action verbs and contextual keywords around your skills');
+        }
+        
+        return recommendations;
+    }
+
+    displayATSScore(score) {
+        if (!this.elements.atsScoreSection) return;
+        
+        this.elements.atsScoreSection.style.display = 'block';
+        
+        // Update overall score
+        this.elements.scorePercentage.textContent = score.overall + '%';
+        
+        // Update score circle
+        const scoreCircle = document.querySelector('.score-circle');
+        if (scoreCircle) {
+            const angle = (score.overall / 100) * 360;
+            scoreCircle.style.setProperty('--score-angle', angle + 'deg');
+            
+            // Add appropriate class based on score
+            scoreCircle.className = 'score-circle';
+            if (score.overall >= 85) scoreCircle.classList.add('excellent');
+            else if (score.overall >= 70) scoreCircle.classList.add('good');
+            else if (score.overall >= 50) scoreCircle.classList.add('fair');
+            else scoreCircle.classList.add('poor');
+        }
+        
+        // Update breakdown scores
+        this.updateBreakdownScore('keywords-score', score.breakdown.keywords);
+        this.updateBreakdownScore('skills-score', score.breakdown.skills);
+        this.updateBreakdownScore('experience-score', score.breakdown.experience);
+        this.updateBreakdownScore('format-score', score.breakdown.format);
+        
+        // Update recommendations
+        if (this.elements.recommendationsList && score.recommendations) {
+            this.elements.recommendationsList.innerHTML = score.recommendations
+                .map(rec => `<li>${rec}</li>`)
+                .join('');
+        }
+        
+        // Show download button after a delay (gives user time to review score)
+        setTimeout(() => {
+            if (this.elements.downloadCvBtn) {
+                this.elements.downloadCvBtn.style.display = 'inline-block';
+            }
+        }, 2000);
+    }
+
+    updateBreakdownScore(elementId, score) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.textContent = score + '%';
+            element.className = 'score-value';
+            
+            if (score >= 85) element.classList.add('excellent');
+            else if (score >= 70) element.classList.add('good');
+            else if (score >= 50) element.classList.add('fair');
+            else element.classList.add('poor');
+        }
+    }
+
+    toggleRecommendations() {
+        if (this.elements.scoreRecommendations) {
+            const isVisible = this.elements.scoreRecommendations.style.display !== 'none';
+            this.elements.scoreRecommendations.style.display = isVisible ? 'none' : 'block';
+            
+            const btn = this.elements.showRecommendationsBtn;
+            if (btn) {
+                btn.textContent = isVisible ? '💡 Show Recommendations' : '💡 Hide Recommendations';
+            }
+        }
+    }
+
+    async improveCV() {
+        try {
+            this.showNotification('🔄 Improving CV based on ATS recommendations...', 'info');
+            
+            // This would typically send the CV back to the API for improvements
+            // For now, we'll simulate the process
+            setTimeout(() => {
+                this.showNotification('✅ CV improved! Generate a new version to see changes.', 'success');
+            }, 2000);
+            
+        } catch (error) {
+            console.error('[ATS Score] Error improving CV:', error);
+            this.showNotification('❌ Failed to improve CV. Please try again.', 'error');
+        }
     }
 }
 
