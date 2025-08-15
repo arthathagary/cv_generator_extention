@@ -1,0 +1,330 @@
+// Options page for Resume AI Chrome Extension settings
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume AI - Settings</title>
+    <link rel="stylesheet" href="options.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <img src="../icons/icon48.png" alt="Resume AI" class="logo-icon">
+                    <h1>Resume AI Settings</h1>
+                </div>
+                <div class="version">v1.0.0</div>
+            </div>
+        </header>
+
+        <nav class="nav-tabs">
+            <button class="tab-button active" data-tab="general">General</button>
+            <button class="tab-button" data-tab="ai">Backend API</button>
+            <button class="tab-button" data-tab="extraction">Job Extraction</button>
+            <button class="tab-button" data-tab="cv">CV Generation</button>
+            <button class="tab-button" data-tab="account">Account</button>
+            <button class="tab-button" data-tab="about">About</button>
+        </nav>
+
+        <main class="main-content">
+            <!-- General Settings Tab -->
+            <div id="general-tab" class="tab-content active">
+                <div class="section">
+                    <h2>General Settings</h2>
+                    
+                    <div class="setting-group">
+                        <label class="setting-label">
+                            <input type="checkbox" id="auto-detect" class="checkbox">
+                            <span class="checkmark"></span>
+                            Auto-detect job pages
+                        </label>
+                        <p class="setting-description">Automatically start extracting job details when you visit a job posting</p>
+                    </div>
+
+                    <div class="setting-group">
+                        <label class="setting-label">
+                            <input type="checkbox" id="highlight-keywords" class="checkbox">
+                            <span class="checkmark"></span>
+                            Highlight important keywords
+                        </label>
+                        <p class="setting-description">Visually highlight important skills and keywords on job pages</p>
+                    </div>
+
+                    <div class="setting-group">
+                        <label class="setting-label">
+                            <input type="checkbox" id="show-notifications" class="checkbox">
+                            <span class="checkmark"></span>
+                            Show notifications
+                        </label>
+                        <p class="setting-description">Display notifications for extraction completion and other events</p>
+                    </div>
+
+                    <div class="setting-group">
+                        <label class="setting-label">
+                            <input type="checkbox" id="auto-save" class="checkbox">
+                            <span class="checkmark"></span>
+                            Auto-save extracted data
+                        </label>
+                        <p class="setting-description">Automatically save job details and generated CVs to your profile</p>
+                    </div>
+
+                    <div class="setting-group">
+                        <label for="theme-select" class="setting-label-select">Theme</label>
+                        <select id="theme-select" class="select">
+                            <option value="auto">Auto (System)</option>
+                            <option value="light">Light</option>
+                            <option value="dark">Dark</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-group">
+                        <label for="language-select" class="setting-label-select">Language</label>
+                        <select id="language-select" class="select">
+                            <option value="en">English</option>
+                            <option value="es">Spanish</option>
+                            <option value="fr">French</option>
+                            <option value="de">German</option>
+                            <option value="it">Italian</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Backend API Configuration Tab -->
+            <div id="ai-tab" class="tab-content">
+                <div class="section">
+                    <h2>Backend API Configuration</h2>
+                    
+                    <div class="setting-group">
+                        <label for="backend-api-url" class="setting-label-select">Backend API URL</label>
+                        <input type="url" id="backend-api-url" class="input" placeholder="http://localhost:3000" value="http://localhost:3000">
+                        <p class="setting-description">URL of your backend API that handles AI processing</p>
+                    </div>
+
+                    <div class="setting-group">
+                        <label for="api-timeout" class="setting-label-select">Request Timeout (seconds)</label>
+                        <input type="number" id="api-timeout" class="input" min="5" max="60" value="30">
+                        <p class="setting-description">Maximum time to wait for API responses</p>
+                    </div>
+
+                    <div class="setting-group">
+                        <label for="retry-attempts" class="setting-label-select">Retry Attempts</label>
+                        <input type="number" id="retry-attempts" class="input" min="1" max="5" value="3">
+                        <p class="setting-description">Number of times to retry failed API requests</p>
+                    </div>
+
+                    <div class="setting-group">
+                        <button id="test-backend-connection" class="btn btn-secondary">Test Backend Connection</button>
+                        <div id="backend-test-result" class="test-result"></div>
+                    </div>
+
+                    <div class="info-box">
+                        <h3>Backend Requirements</h3>
+                        <p>Your backend should implement these endpoints:</p>
+                        <ul>
+                            <li><code>POST /api/extract-job-details</code> - Job extraction</li>
+                            <li><code>POST /api/generate-cv</code> - CV generation</li>
+                            <li><code>POST /api/analyze-job</code> - Job analysis (optional)</li>
+                        </ul>
+                        <p>See the <a href="#" id="view-api-docs">API documentation</a> for details.</p>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <!-- Job Extraction Tab -->
+            <div id="extraction-tab" class="tab-content">
+                <div class="section">
+                    <h2>Job Extraction Settings</h2>
+                    
+                    <div class="setting-group">
+                        <h3>Supported Job Sites</h3>
+                        <div class="job-sites-list" id="job-sites-list">
+                            <!-- Populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <div class="setting-group">
+                        <label for="extraction-delay" class="setting-label-select">Extraction Delay (seconds)</label>
+                        <input type="number" id="extraction-delay" class="input" min="1" max="10" value="2">
+                        <p class="setting-description">Delay before starting extraction to allow page to fully load</p>
+                    </div>
+
+                    <div class="setting-group">
+                        <label class="setting-label">
+                            <input type="checkbox" id="extract-company-info" class="checkbox">
+                            <span class="checkmark"></span>
+                            Extract company information
+                        </label>
+                        <p class="setting-description">Include company size, industry, and other details when available</p>
+                    </div>
+
+                    <div class="setting-group">
+                        <label class="setting-label">
+                            <input type="checkbox" id="extract-salary-info" class="checkbox">
+                            <span class="checkmark"></span>
+                            Extract salary information
+                        </label>
+                        <p class="setting-description">Include salary ranges and benefits when mentioned</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CV Generation Tab -->
+            <div id="cv-tab" class="tab-content">
+                <div class="section">
+                    <h2>CV Generation Settings</h2>
+                    
+                    <div class="setting-group">
+                        <label for="cv-format" class="setting-label-select">Default CV Format</label>
+                        <select id="cv-format" class="select">
+                            <option value="pdf">PDF</option>
+                            <option value="docx">Word Document</option>
+                            <option value="html">HTML</option>
+                            <option value="txt">Plain Text</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-group">
+                        <label for="cv-template" class="setting-label-select">CV Template</label>
+                        <select id="cv-template" class="select">
+                            <option value="ats-optimized">ATS Optimized</option>
+                            <option value="modern">Modern Professional</option>
+                            <option value="technical">Technical Focus</option>
+                            <option value="creative">Creative</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-group">
+                        <label class="setting-label">
+                            <input type="checkbox" id="include-cover-letter" class="checkbox">
+                            <span class="checkmark"></span>
+                            Generate cover letter
+                        </label>
+                        <p class="setting-description">Automatically generate a tailored cover letter with each CV</p>
+                    </div>
+
+                    <div class="setting-group">
+                        <label class="setting-label">
+                            <input type="checkbox" id="optimize-keywords" class="checkbox">
+                            <span class="checkmark"></span>
+                            Optimize for ATS keywords
+                        </label>
+                        <p class="setting-description">Ensure CV includes relevant keywords from the job posting</p>
+                    </div>
+
+                    <div class="setting-group">
+                        <label for="cv-length" class="setting-label-select">Preferred CV Length</label>
+                        <select id="cv-length" class="select">
+                            <option value="1">1 Page</option>
+                            <option value="2">2 Pages</option>
+                            <option value="auto">Auto (Based on Experience)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Tab -->
+            <div id="account-tab" class="tab-content">
+                <div class="section">
+                    <h2>Account & Sync</h2>
+                    
+                    <div class="setting-group">
+                        <div class="account-status" id="account-status">
+                            <div class="status-indicator disconnected"></div>
+                            <div class="status-text">
+                                <h3>Not Connected</h3>
+                                <p>Connect your web app account to sync profiles and CVs</p>
+                            </div>
+                        </div>
+                        <button id="connect-account" class="btn btn-primary">Connect Account</button>
+                        <button id="disconnect-account" class="btn btn-secondary" style="display: none;">Disconnect</button>
+                    </div>
+
+                    <div class="setting-group">
+                        <label for="webapp-url" class="setting-label-select">Web App URL</label>
+                        <input type="url" id="webapp-url" class="input" placeholder="http://localhost:3000">
+                        <p class="setting-description">URL of your Resume AI web application</p>
+                    </div>
+
+                    <div class="setting-group">
+                        <h3>Data Management</h3>
+                        <div class="data-actions">
+                            <button id="export-data" class="btn btn-secondary">Export Data</button>
+                            <button id="import-data" class="btn btn-secondary">Import Data</button>
+                            <button id="clear-data" class="btn btn-danger">Clear All Data</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- About Tab -->
+            <div id="about-tab" class="tab-content">
+                <div class="section">
+                    <h2>About Resume AI</h2>
+                    
+                    <div class="about-content">
+                        <div class="feature-list">
+                            <h3>Features</h3>
+                            <ul>
+                                <li>✨ AI-powered CV generation using Google Gemini</li>
+                                <li>🔍 Intelligent job detail extraction from major job sites</li>
+                                <li>🎯 ATS-optimized CV formatting</li>
+                                <li>🔗 Seamless web app integration</li>
+                                <li>📊 Job matching and compatibility scoring</li>
+                                <li>🎨 Multiple CV templates and formats</li>
+                            </ul>
+                        </div>
+
+                        <div class="support-info">
+                            <h3>Support & Documentation</h3>
+                            <div class="support-links">
+                                <a href="http://localhost:3000/help" target="_blank" class="support-link">
+                                    📚 User Guide
+                                </a>
+                                <a href="http://localhost:3000/support" target="_blank" class="support-link">
+                                    💬 Contact Support
+                                </a>
+                                <a href="https://github.com/your-repo/resume-ai" target="_blank" class="support-link">
+                                    🐛 Report Issue
+                                </a>
+                                <a href="http://localhost:3000/privacy" target="_blank" class="support-link">
+                                    🔒 Privacy Policy
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="version-info">
+                            <h3>Version Information</h3>
+                            <p>Extension Version: <strong>1.0.0</strong></p>
+                            <p>Last Updated: <span id="last-updated">August 2025</span></p>
+                            <p>Manifest Version: <strong>3</strong></p>
+                        </div>
+
+                        <div class="credits">
+                            <h3>Credits</h3>
+                            <p>Built with ❤️ using modern web technologies</p>
+                            <p>AI powered by Google Gemini</p>
+                            <p>Icons by Heroicons</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <div class="footer-actions">
+                <button id="save-settings" class="btn btn-primary">Save Settings</button>
+                <button id="reset-settings" class="btn btn-secondary">Reset to Defaults</button>
+            </div>
+            <div class="footer-status">
+                <div id="save-status" class="save-status"></div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="options.js"></script>
+</body>
+</html>
