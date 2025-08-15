@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume AI</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <img src="../icons/icon32.png" alt="Resume AI" class="logo-icon">
+                <h1>Resume AI</h1>
+            </div>
+        </header>
+        
+        <main>
+            <div class="status-section">
+                <div id="job-status" class="status-card">
+                    <div class="status-icon">🔍</div>
+                    <div class="status-text">
+                        <h3>Job Detection</h3>
+                        <p id="job-status-text">Ready to analyze job postings and generate tailored resumes...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-section">
+                <div class="profile-status">
+                    <span id="profile-indicator" class="indicator">●</span>
+                    <span id="profile-text">Profile Status</span>
+                </div>
+                <div class="profile-actions">
+                    <button id="connect-profile" class="btn btn-secondary">Connect Profile</button>
+                    <button id="sync-profile" class="btn btn-outline" title="Sync latest profile data">🔄 Sync</button>
+                    <button id="disconnect-profile" class="btn btn-danger" title="Disconnect and reconnect profile">🔓 Disconnect</button>
+                </div>
+            </div>
+
+            <div class="actions-section">
+                <button id="extract-job" class="btn btn-primary">
+                    <span class="btn-icon">🤖</span>
+                    Extract Job Details with AI
+                </button>
+            </div>
+
+            <!-- Selection Preview Section -->
+            <div id="selection-preview" class="selection-preview" style="display: none;">
+                <h3>Selected Content</h3>
+                <div id="preview-content" class="preview-content"></div>
+            </div>
+
+            <!-- AI Analysis Section -->
+            <div id="ai-analysis" class="ai-analysis" style="display: none;">
+                <h3>AI Analysis</h3>
+                <div id="analysis-content" class="analysis-content"></div>
+                <div class="analysis-actions">
+                    <button id="approve-analysis" class="btn btn-success">✅ Approve Analysis</button>
+                    <button id="generate-cv-btn" class="btn btn-primary" style="display: none;">📄 Generate ATS-Friendly CV</button>
+                    <button id="reselect-content" class="btn btn-secondary">🔄 Select Again</button>
+                </div>
+            </div>
+
+            <div class="progress-section" id="progress-section" style="display: none;">
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill"></div>
+                </div>
+                <p id="progress-text">Processing...</p>
+            </div>
+
+            <div class="results-section" id="results-section" style="display: none;">
+                <h3>Extraction Results</h3>
+                <div id="job-summary" class="job-summary"></div>
+                <div class="actions">
+                    <button id="download-cv" class="btn btn-download">
+                        <span class="btn-icon">⬇️</span>
+                        Download CV
+                    </button>
+                    <button id="edit-cv" class="btn btn-edit">
+                        <span class="btn-icon">✏️</span>
+                        Edit & Improve
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <div class="settings">
+                <button id="settings-btn" class="icon-btn" title="Settings">⚙️</button>
+                <button id="help-btn" class="icon-btn" title="Help">❓</button>
+            </div>
+        </footer>
+    </div>
+
+    <script src="../jspdf.min.js"></script>
+    <script src="popup.js"></script>
+</body>
+</html>

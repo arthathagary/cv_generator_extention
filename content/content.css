@@ -1,0 +1,381 @@
+/* Content script styles for Resume AI Chrome Extension */
+
+/* Floating Action Button */
+#resume-ai-fab {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    z-index: 2147483647 !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif !important;
+}
+
+.fab-button {
+    width: 56px !important;
+    height: 56px !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+    transition: all 0.3s ease !important;
+    border: none !important;
+    outline: none !important;
+}
+
+.fab-button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6) !important;
+}
+
+.fab-button:active {
+    transform: translateY(0) !important;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4) !important;
+}
+
+.fab-button.extracting {
+    animation: pulse 1.5s infinite !important;
+}
+
+.fab-button.success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+}
+
+.fab-button.error {
+    background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%) !important;
+}
+
+.fab-tooltip {
+    position: absolute !important;
+    bottom: 70px !important;
+    right: 0 !important;
+    background: rgba(0, 0, 0, 0.9) !important;
+    color: white !important;
+    padding: 8px 12px !important;
+    border-radius: 6px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    white-space: nowrap !important;
+    opacity: 0 !important;
+    transform: translateY(10px) !important;
+    transition: all 0.3s ease !important;
+    pointer-events: none !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.fab-tooltip::after {
+    content: '' !important;
+    position: absolute !important;
+    top: 100% !important;
+    right: 20px !important;
+    border: 6px solid transparent !important;
+    border-top-color: rgba(0, 0, 0, 0.9) !important;
+}
+
+#resume-ai-fab:hover .fab-tooltip {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
+/* Job content highlighting */
+.job-highlight {
+    background-color: rgba(102, 126, 234, 0.15) !important;
+    border-radius: 3px !important;
+    padding: 1px 3px !important;
+    margin: 0 1px !important;
+    transition: all 0.3s ease !important;
+    border: 1px solid rgba(102, 126, 234, 0.3) !important;
+}
+
+.job-highlight:hover {
+    background-color: rgba(102, 126, 234, 0.25) !important;
+    border-color: rgba(102, 126, 234, 0.5) !important;
+}
+
+/* Skill tags highlighting */
+.skill-highlight {
+    background-color: rgba(40, 167, 69, 0.15) !important;
+    border-radius: 12px !important;
+    padding: 2px 8px !important;
+    margin: 0 2px !important;
+    font-weight: 500 !important;
+    font-size: 0.9em !important;
+    border: 1px solid rgba(40, 167, 69, 0.3) !important;
+}
+
+/* Requirement highlighting */
+.requirement-highlight {
+    background-color: rgba(255, 193, 7, 0.15) !important;
+    border-left: 3px solid #ffc107 !important;
+    padding: 2px 6px !important;
+    margin: 2px 0 !important;
+}
+
+/* Extraction status indicator */
+.extraction-indicator {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    background: white !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    padding: 12px 16px !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-size: 14px !important;
+    z-index: 2147483646 !important;
+    opacity: 0 !important;
+    transform: translateY(-20px) !important;
+    transition: all 0.3s ease !important;
+}
+
+.extraction-indicator.show {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
+.extraction-indicator.success {
+    border-left: 4px solid #28a745 !important;
+    color: #155724 !important;
+}
+
+.extraction-indicator.error {
+    border-left: 4px solid #dc3545 !important;
+    color: #721c24 !important;
+}
+
+.extraction-indicator.processing {
+    border-left: 4px solid #667eea !important;
+    color: #004085 !important;
+}
+
+/* Loading spinner */
+.extraction-spinner {
+    display: inline-block !important;
+    width: 16px !important;
+    height: 16px !important;
+    border: 2px solid rgba(102, 126, 234, 0.3) !important;
+    border-radius: 50% !important;
+    border-top-color: #667eea !important;
+    animation: spin 1s ease-in-out infinite !important;
+    margin-right: 8px !important;
+}
+
+/* Job details overlay */
+.job-details-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(0, 0, 0, 0.7) !important;
+    z-index: 2147483647 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    opacity: 0 !important;
+    transition: all 0.3s ease !important;
+}
+
+.job-details-overlay.show {
+    opacity: 1 !important;
+}
+
+.job-details-modal {
+    background: white !important;
+    border-radius: 12px !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3) !important;
+    max-width: 600px !important;
+    max-height: 80vh !important;
+    overflow-y: auto !important;
+    padding: 24px !important;
+    margin: 20px !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    transform: scale(0.9) !important;
+    transition: all 0.3s ease !important;
+}
+
+.job-details-overlay.show .job-details-modal {
+    transform: scale(1) !important;
+}
+
+.job-details-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 20px !important;
+    padding-bottom: 16px !important;
+    border-bottom: 1px solid #e9ecef !important;
+}
+
+.job-details-title {
+    font-size: 20px !important;
+    font-weight: 600 !important;
+    color: #333 !important;
+    margin: 0 !important;
+}
+
+.job-details-close {
+    background: none !important;
+    border: none !important;
+    font-size: 24px !important;
+    cursor: pointer !important;
+    color: #666 !important;
+    padding: 4px !important;
+    border-radius: 4px !important;
+    transition: all 0.2s ease !important;
+}
+
+.job-details-close:hover {
+    background: #f8f9fa !important;
+    color: #333 !important;
+}
+
+.job-detail-section {
+    margin-bottom: 20px !important;
+}
+
+.job-detail-label {
+    font-weight: 600 !important;
+    color: #495057 !important;
+    margin-bottom: 8px !important;
+    font-size: 14px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+.job-detail-content {
+    color: #333 !important;
+    line-height: 1.6 !important;
+    font-size: 14px !important;
+}
+
+.job-skills-list {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+}
+
+.job-skill-tag {
+    background: #667eea !important;
+    color: white !important;
+    padding: 4px 12px !important;
+    border-radius: 16px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+}
+
+.job-keywords-list {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+}
+
+.job-keyword-tag {
+    background: #f8f9fa !important;
+    color: #495057 !important;
+    padding: 2px 8px !important;
+    border-radius: 12px !important;
+    font-size: 11px !important;
+    border: 1px solid #dee2e6 !important;
+}
+
+/* Animations */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    #resume-ai-fab {
+        bottom: 15px !important;
+        right: 15px !important;
+    }
+    
+    .fab-button {
+        width: 48px !important;
+        height: 48px !important;
+    }
+    
+    .job-details-modal {
+        margin: 10px !important;
+        max-height: 90vh !important;
+        padding: 16px !important;
+    }
+    
+    .fab-tooltip {
+        display: none !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .job-highlight {
+        background-color: rgba(102, 126, 234, 0.3) !important;
+        border-color: #667eea !important;
+    }
+    
+    .fab-button {
+        border: 2px solid rgba(255, 255, 255, 0.8) !important;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .fab-button,
+    .fab-tooltip,
+    .extraction-indicator,
+    .job-details-overlay,
+    .job-details-modal {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .job-details-modal {
+        background: #2d3748 !important;
+        color: #e2e8f0 !important;
+    }
+    
+    .job-details-title {
+        color: #f7fafc !important;
+    }
+    
+    .job-detail-label {
+        color: #a0aec0 !important;
+    }
+    
+    .job-detail-content {
+        color: #e2e8f0 !important;
+    }
+    
+    .job-keyword-tag {
+        background: #4a5568 !important;
+        color: #e2e8f0 !important;
+        border-color: #718096 !important;
+    }
+    
+    .extraction-indicator {
+        background: #2d3748 !important;
+        color: #e2e8f0 !important;
+    }
+}
