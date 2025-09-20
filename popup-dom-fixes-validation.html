@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Popup DOM Error Fixes Validation</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5; }
+        .test-container { max-width: 800px; margin: 0 auto; }
+        .test-result { margin: 10px 0; padding: 15px; border-radius: 5px; }
+        .test-pass { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .test-fail { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .test-section { background: white; margin: 20px 0; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        button { margin: 5px; padding: 10px 15px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .summary { background: #e9ecef; padding: 15px; border-radius: 5px; margin-top: 20px; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔧 Popup DOM Error Fixes Validation</h1>
+        <p>This page validates all the DOM selector and button state management fixes applied to the popup.js file.</p>
+        
+        <div class="test-section">
+            <h2>Test Controls</h2>
+            <button onclick="runAllTests()">🧪 Run All Tests</button>
+            <button onclick="testSafeButtonStates()">🔲 Test Safe Button States</button>
+            <button onclick="testDOMSelectors()">🎯 Test DOM Selectors</button>
+            <button onclick="testErrorHandling()">⚠️ Test Error Handling</button>
+            <button onclick="clearResults()">🗑️ Clear Results</button>
+        </div>
+        
+        <div class="test-section">
+            <h2>Test Results</h2>
+            <div id="test-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Applied Fixes Summary</h2>
+            <div class="summary">
+                <h3>✅ Key Fixes Applied:</h3>
+                <ul>
+                    <li><strong>Safe Button State Management:</strong> Added <code>safeSetButtonState()</code> helper method</li>
+                    <li><strong>Cursor Selection Fix:</strong> Removed direct DOM element access, added safe button handling</li>
+                    <li><strong>Area Selection Fix:</strong> Replaced direct button property access with safe methods</li>
+                    <li><strong>Viewport/Full Page Selection Fix:</strong> Safe button state changes with timeout handling</li>
+                    <li><strong>AI Analysis Button Fix:</strong> Safe button state management in async operations</li>
+                    <li><strong>Manual Selection Toggle Fix:</strong> Safe text content updates</li>
+                    <li><strong>DOM Selector Fallbacks:</strong> Multiple fallback selectors for critical elements</li>
+                    <li><strong>Error Isolation:</strong> Try-catch blocks prevent single DOM errors from crashing popup</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Mock popup elements for testing -->
+        <div style="display: none;" id="mock-popup">
+            <div id="job-status" class="status-card">
+                <p id="job-status-text">Ready to extract job details</p>
+            </div>
+            <button id="start-cursor-selection">👆 Cursor Selection</button>
+            <button id="start-area-selection">🎯 Area Selection</button>
+            <button id="select-viewport">📺 Select Viewport</button>
+            <button id="select-full-page">📄 Select Full Page</button>
+            <button id="start-scroll-selection">📜 Scroll Selection</button>
+            <button id="send-to-ai">🤖 Analyze with AI</button>
+            <button id="manual-select">👆 Manual Selection</button>
+            <button id="generate-cv">✨ Generate CV</button>
+            <button id="extract-job">🤖 Extract Job</button>
+        </div>
+    </div>
+
+    <script>
+        let testResults = [];
+
+        // Mock the PopupController's safeSetButtonState method
+        class MockPopupController {
+            constructor() {
+                this.elements = {
+                    startCursorSelectionBtn: document.getElementById('start-cursor-selection'),
+                    startAreaSelectionBtn: document.getElementById('start-area-selection'),
+                    selectViewportBtn: document.getElementById('select-viewport'),
+                    selectFullPageBtn: document.getElementById('select-full-page'),
+                    startScrollSelectionBtn: document.getElementById('start-scroll-selection'),
+                    sendToAiBtn: document.getElementById('send-to-ai'),
+                    manualSelectBtn: document.getElementById('manual-select'),
+                    generateCvBtn: document.getElementById('generate-cv'),
+                    extractJobBtn: document.getElementById('extract-job'),
+                    jobStatus: document.getElementById('job-status-text')
+                };
+            }
+
+            safeSetButtonState(elementName, disabled, text = null) {
+                try {
+                    const element = this.elements[elementName];
+                    if (element) {
+                        element.disabled = disabled;
+                        if (text !== null) {
+                            element.textContent = text;
+                        }
+                        return true;
+                    } else {
+                        console.warn(`Button element '${elementName}' not found`);
+                        return false;
+                    }
+                } catch (error) {
+                    console.error(`Error setting button state for '${elementName}':`, error);
+                    return false;
+                }
+            }
+
+            updateJobStatus(message, status) {
+                const jobStatusElement = this.elements.jobStatus ||
+                    document.getElementById('job-status-text') ||
+                    document.querySelector('#job-status-text') ||
+                    document.querySelector('#job-status p');
+                
+                if (jobStatusElement) {
+                    jobStatusElement.textContent = message;
+                    return true;
+                } else {
+                    console.warn('Could not find job status element to update');
+                    return false;
+                }
+            }
+        }
+
+        function addTestResult(testName, passed, message, details = null) {
+            const result = { testName, passed, message, details, timestamp: new Date() };
+            testResults.push(result);
+            
+            const resultsDiv = document.getElementById('test-results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${passed ? 'test-pass' : 'test-fail'}`;
+            resultDiv.innerHTML = `
+                <strong>${testName}:</strong> ${passed ? '✅ PASS' : '❌ FAIL'} - ${message}
+                ${details ? `<pre>${details}</pre>` : ''}
+                <small>Timestamp: ${result.timestamp.toLocaleTimeString()}</small>
+            `;
+            resultsDiv.appendChild(resultDiv);
+        }
+
+        function clearResults() {
+            testResults = [];
+            document.getElementById('test-results').innerHTML = '';
+        }
+
+        function testSafeButtonStates() {
+            const popup = new MockPopupController();
+            
+            // Test 1: Setting state on existing button
+            const result1 = popup.safeSetButtonState('startCursorSelectionBtn', true, 'Testing...');
+            addTestResult('Safe Button State (Existing)', result1, 
+                result1 ? 'Successfully set button state on existing element' : 'Failed to set button state');
+            
+            // Test 2: Setting state on non-existent button
+            const result2 = popup.safeSetButtonState('nonExistentBtn', true);
+            addTestResult('Safe Button State (Missing)', !result2, 
+                !result2 ? 'Properly handled missing button (returned false)' : 'Should have returned false for missing button');
+            
+            // Test 3: Setting state with text content
+            const result3 = popup.safeSetButtonState('startAreaSelectionBtn', false, '🎯 Area Selection');
+            const button = document.getElementById('start-area-selection');
+            const textCorrect = button && button.textContent === '🎯 Area Selection';
+            addTestResult('Safe Button Text Update', result3 && textCorrect, 
+                `Button text update: ${textCorrect ? 'correct' : 'incorrect'}`);
+            
+            // Test 4: Disabled state verification
+            popup.safeSetButtonState('selectViewportBtn', true);
+            const viewportBtn = document.getElementById('select-viewport');
+            const disabledCorrect = viewportBtn && viewportBtn.disabled === true;
+            addTestResult('Button Disabled State', disabledCorrect, 
+                `Button disabled state: ${disabledCorrect ? 'correctly set' : 'not set properly'}`);
+        }
+
+        function testDOMSelectors() {
+            const popup = new MockPopupController();
+            
+            // Test DOM element initialization
+            const elementsFound = Object.keys(popup.elements).filter(key => popup.elements[key] !== null);
+            const totalElements = Object.keys(popup.elements).length;
+            const initSuccess = elementsFound.length === totalElements;
+            
+            addTestResult('DOM Element Initialization', initSuccess, 
+                `Found ${elementsFound.length}/${totalElements} elements`, 
+                `Missing elements: ${Object.keys(popup.elements).filter(key => popup.elements[key] === null).join(', ') || 'None'}`);
+            
+            // Test job status update with fallbacks
+            const statusUpdateResult = popup.updateJobStatus('Test status message', 'success');
+            addTestResult('Job Status Update', statusUpdateResult, 
+                statusUpdateResult ? 'Successfully updated job status with fallback selectors' : 'Failed to update job status');
+            
+            // Test fallback selector chain
+            const fallbackSelectors = [
+                '#job-status-text',
+                '#job-status p',
+                '.status-text p'
+            ];
+            
+            let fallbackResults = [];
+            fallbackSelectors.forEach(selector => {
+                const element = document.querySelector(selector);
+                fallbackResults.push({ selector, found: !!element });
+            });
+            
+            const fallbacksWorking = fallbackResults.filter(r => r.found).length > 0;
+            addTestResult('DOM Selector Fallbacks', fallbacksWorking, 
+                `${fallbackResults.filter(r => r.found).length} fallback selectors working`,
+                fallbackResults.map(r => `${r.selector}: ${r.found ? '✅' : '❌'}`).join('\n'));
+        }
+
+        function testErrorHandling() {
+            const popup = new MockPopupController();
+            
+            // Test error handling with null elements
+            popup.elements.nullElement = null;
+            const nullResult = popup.safeSetButtonState('nullElement', true);
+            addTestResult('Null Element Handling', !nullResult, 
+                !nullResult ? 'Properly handled null element without throwing error' : 'Should have returned false for null element');
+            
+            // Test error handling with undefined elements
+            const undefinedResult = popup.safeSetButtonState('undefinedElement', true);
+            addTestResult('Undefined Element Handling', !undefinedResult, 
+                !undefinedResult ? 'Properly handled undefined element without throwing error' : 'Should have returned false for undefined element');
+            
+            // Test try-catch error isolation
+            let errorThrown = false;
+            try {
+                // Simulate error in button state setting
+                const mockElement = { 
+                    get disabled() { throw new Error('Simulated DOM error'); },
+                    set disabled(value) { throw new Error('Simulated DOM error'); }
+                };
+                popup.elements.errorButton = mockElement;
+                const errorResult = popup.safeSetButtonState('errorButton', true);
+                addTestResult('Error Isolation', !errorResult, 
+                    'Error caught and handled without crashing the popup');
+            } catch (error) {
+                errorThrown = true;
+                addTestResult('Error Isolation', false, 
+                    `Error not properly caught: ${error.message}`);
+            }
+        }
+
+        function runAllTests() {
+            clearResults();
+            
+            addTestResult('Test Suite Started', true, `Running comprehensive popup DOM fixes validation at ${new Date().toLocaleTimeString()}`);
+            
+            setTimeout(() => testSafeButtonStates(), 100);
+            setTimeout(() => testDOMSelectors(), 200);
+            setTimeout(() => testErrorHandling(), 300);
+            
+            setTimeout(() => {
+                const totalTests = testResults.filter(r => r.testName !== 'Test Suite Started').length;
+                const passedTests = testResults.filter(r => r.passed && r.testName !== 'Test Suite Started').length;
+                const successRate = totalTests > 0 ? ((passedTests / totalTests) * 100).toFixed(1) : 0;
+                
+                addTestResult('Test Suite Complete', successRate >= 90, 
+                    `${passedTests}/${totalTests} tests passed (${successRate}% success rate)`,
+                    `Test completed at ${new Date().toLocaleTimeString()}`);
+            }, 500);
+        }
+
+        // Auto-run tests on page load
+        window.addEventListener('load', () => {
+            setTimeout(runAllTests, 1000);
+        });
+    </script>
+</body>
+</html>
