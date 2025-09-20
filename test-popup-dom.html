@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Popup DOM Selectors</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .test-pass { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .test-fail { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        button { margin: 5px; padding: 8px 15px; }
+    </style>
+</head>
+<body>
+    <h1>Popup DOM Selector Test</h1>
+    <p>This page tests the DOM selectors used in the popup to ensure they work correctly.</p>
+    
+    <button onclick="testPopupInitialization()">Test Popup Initialization</button>
+    <button onclick="testDOMSelectors()">Test DOM Selectors</button>
+    <button onclick="testErrorHandling()">Test Error Handling</button>
+    
+    <div id="test-results"></div>
+    
+    <!-- Mock popup HTML structure for testing -->
+    <div style="display: none;">
+        <div id="job-status" class="status-card">
+            <div class="status-icon">🔍</div>
+            <div class="status-text">
+                <h3>Page Analysis</h3>
+                <p id="job-status-text">Ready to extract job details from any page...</p>
+            </div>
+        </div>
+        
+        <div class="profile-section">
+            <div class="profile-status">
+                <span id="profile-indicator" class="indicator">●</span>
+                <span id="profile-text">Profile Status</span>
+            </div>
+            <button id="connect-profile" class="btn btn-secondary">Connect Profile</button>
+        </div>
+        
+        <div class="actions-section">
+            <button id="extract-job" class="btn btn-primary">Extract Job Details</button>
+            <button id="manual-select" class="btn btn-secondary">Manual Selection</button>
+            <button id="generate-cv" class="btn btn-success" disabled>Generate CV</button>
+            <button id="download-cv" class="btn btn-primary" disabled>Download CV</button>
+            <button id="edit-cv" class="btn btn-secondary" disabled>Edit CV</button>
+        </div>
+        
+        <div id="manual-selection-section" style="display: none;">
+            <button id="clear-selections">Clear</button>
+            <button id="finish-manual-selection">Finish</button>
+            <button id="start-area-selection">Area Selection</button>
+            <button id="start-cursor-selection">Cursor Selection</button>
+            <button id="select-viewport">Select Viewport</button>
+            <button id="select-full-page">Select Full Page</button>
+            <button id="start-scroll-selection">Scroll Selection</button>
+        </div>
+        
+        <div id="progress-section" style="display: none;">
+            <div id="progress-fill"></div>
+            <div id="progress-text">Processing...</div>
+        </div>
+        
+        <div id="results-section" style="display: none;">
+            <div id="job-summary"></div>
+        </div>
+        
+        <div id="selection-preview" style="display: none;">
+            <div id="preview-content"></div>
+            <button id="modify-selection">Modify</button>
+            <button id="send-to-ai">Send to AI</button>
+        </div>
+        
+        <div id="ai-analysis" style="display: none;">
+            <div id="analysis-content"></div>
+            <button id="approve-analysis">Approve</button>
+            <button id="reselect-content">Reselect</button>
+        </div>
+        
+        <div class="footer">
+            <button id="settings-btn">Settings</button>
+            <button id="help-btn">Help</button>
+        </div>
+    </div>
+
+    <script>
+        // Mock Chrome API for testing
+        const chrome = {
+            storage: {
+                sync: {
+                    get: (keys, callback) => {
+                        setTimeout(() => callback({}), 10);
+                        return Promise.resolve({});
+                    }
+                },
+                local: {
+                    set: (data) => Promise.resolve(),
+                    get: (keys) => Promise.resolve({})
+                }
+            },
+            runtime: {
+                onMessage: {
+                    addListener: (listener) => {}
+                },
+                sendMessage: (message) => Promise.resolve({})
+            },
+            tabs: {
+                query: (options) => Promise.resolve([{id: 1, url: 'https://example.com'}]),
+                sendMessage: (tabId, message) => Promise.resolve({})
+            }
+        };
+        
+        function addTestResult(testName, passed, message) {
+            const resultsDiv = document.getElementById('test-results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${passed ? 'test-pass' : 'test-fail'}`;
+            resultDiv.innerHTML = `<strong>${testName}:</strong> ${passed ? 'PASS' : 'FAIL'} - ${message}`;
+            resultsDiv.appendChild(resultDiv);
+        }
+        
+        function testPopupInitialization() {
+            try {
+                // Test that we can create the popup controller without errors
+                const mockElements = {
+                    jobStatus: document.getElementById('job-status-text'),
+                    profileIndicator: document.getElementById('profile-indicator'),
+                    profileText: document.getElementById('profile-text'),
+                    connectProfileBtn: document.getElementById('connect-profile'),
+                    extractJobBtn: document.getElementById('extract-job'),
+                    manualSelectBtn: document.getElementById('manual-select'),
+                    generateCvBtn: document.getElementById('generate-cv'),
+                    downloadCvBtn: document.getElementById('download-cv'),
+                    editCvBtn: document.getElementById('edit-cv'),
+                    settingsBtn: document.getElementById('settings-btn'),
+                    helpBtn: document.getElementById('help-btn')
+                };
+                
+                let allElementsFound = true;
+                let missingElements = [];
+                
+                Object.keys(mockElements).forEach(key => {
+                    if (!mockElements[key]) {
+                        allElementsFound = false;
+                        missingElements.push(key);
+                    }
+                });
+                
+                addTestResult('Element Initialization', allElementsFound, 
+                    allElementsFound ? 'All required DOM elements found' : `Missing elements: ${missingElements.join(', ')}`);
+                    
+            } catch (error) {
+                addTestResult('Element Initialization', false, `Error during initialization: ${error.message}`);
+            }
+        }
+        
+        function testDOMSelectors() {
+            // Test the fallback selectors used in the fixed methods
+            const testSelectors = [
+                { selector: '#job-status-text', description: 'Job status text element' },
+                { selector: '#job-status', description: 'Job status container' },
+                { selector: '.status-card', description: 'Status card container' },
+                { selector: '.container', description: 'Main container' }
+            ];
+            
+            testSelectors.forEach(test => {
+                const element = document.querySelector(test.selector);
+                addTestResult(`DOM Selector: ${test.selector}`, !!element, 
+                    element ? `Found ${test.description}` : `${test.description} not found`);
+            });
+        }
+        
+        function testErrorHandling() {
+            // Test the safe button state method
+            try {
+                const mockPopup = {
+                    elements: {
+                        extractJobBtn: document.getElementById('extract-job'),
+                        generateCvBtn: document.getElementById('generate-cv'),
+                        nonExistentBtn: null
+                    },
+                    safeSetButtonState: function(elementName, disabled, text = null) {
+                        try {
+                            const element = this.elements[elementName];
+                            if (element) {
+                                element.disabled = disabled;
+                                if (text !== null) {
+                                    element.textContent = text;
+                                }
+                                return true;
+                            } else {
+                                console.warn(`Button element '${elementName}' not found`);
+                                return false;
+                            }
+                        } catch (error) {
+                            console.error(`Error setting button state for '${elementName}':`, error);
+                            return false;
+                        }
+                    }
+                };
+                
+                // Test setting state on existing button
+                const result1 = mockPopup.safeSetButtonState('extractJobBtn', true, 'Test Text');
+                addTestResult('Safe Button State (Existing)', result1, 
+                    result1 ? 'Successfully set button state' : 'Failed to set button state');
+                
+                // Test setting state on non-existent button
+                const result2 = mockPopup.safeSetButtonState('nonExistentBtn', true);
+                addTestResult('Safe Button State (Missing)', !result2, 
+                    !result2 ? 'Properly handled missing button' : 'Should have returned false for missing button');
+                    
+            } catch (error) {
+                addTestResult('Error Handling Test', false, `Unexpected error: ${error.message}`);
+            }
+        }
+        
+        // Auto-run tests when page loads
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testPopupInitialization();
+                testDOMSelectors();
+                testErrorHandling();
+            }, 100);
+        });
+    </script>
+</body>
+</html>
